@@ -1,22 +1,24 @@
-library(serial)
+require(serial, quietly = TRUE)
 
+#This command show your available COM ports
 listPorts()
-reciver_serial_port <- "COM9"
-file_name <- "2022_7_25"
+reciver_serial_port <- "COM9" #define pneumatron receiver COM port
+file_name <- "2022_7_25" #define where to save your files. change for week files?
 
 message("Reading Pneumatron from port: ",
         reciver_serial_port,
         "\nSaving data to file: ",
         file_name,
         ".csv\n\n")
-# configure one of the com-ports with appropriate connection properties
+
+#Create file with headers in here
+
 con <- serialConnection(port = reciver_serial_port,
                         mode = "115200,n,8,1",
                         newline = 1,
                         translation = "crlf")
 
 open(con)
-
 while (1) {
   tryCatch({
     serial_messages <- read.serialConnection(con)
