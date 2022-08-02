@@ -1,10 +1,5 @@
 require(serial, quietly = TRUE)
 
-#This command show your available COM ports
-listPorts()
-reciver_serial_port <- "COM9" #define pneumatron receiver COM port
-file_name <- "2022_7_25" #define where to save your files. change for week files?
-
 message("Reading Pneumatron from port: ",
         reciver_serial_port,
         "\nSaving data to file: ",
