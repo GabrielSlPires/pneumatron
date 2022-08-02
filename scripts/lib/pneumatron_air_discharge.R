@@ -11,8 +11,8 @@ pneumatron_air_discharge <- function(pneumatron_data,
   #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 
   data <- pneumatron_data %>% 
     dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
-                  !is.na(plant)) %>% 
-    dplyr::group_by(plant, measure) %>% #separete measures and plants
+                  !is.na(id)) %>% 
+    dplyr::group_by(id, measure) %>% #separete measures and plants
     dplyr::summarise(pf = pressure[which(log_line == pf_s*2)], #final pressure
                      pi = pressure[which(log_line == pi_s*2)], #initial pressure
                      #using abs(), due to devices with relative and absotute pressures
@@ -22,7 +22,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                      datetime = datetime[which(log_line == pi_s*2)],
                      .groups = "drop") %>% 
-    dplyr::group_by(plant) %>% 
+    dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
   
