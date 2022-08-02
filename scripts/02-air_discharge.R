@@ -20,7 +20,7 @@ colnames(data) <- c("id",
                     "light",
                     "datetime")
 
-data$datetime <- lubridate::dmy_hm(data$datetime)
+data$datetime <- lubridate::dmy_hms(data$datetime)
 
 data_psi <- data.table::fread(paste0("data/raw_psi/", data_psi_file, ".csv"))
 data_psi$time <- lubridate::dmy_hm(data_psi$time)

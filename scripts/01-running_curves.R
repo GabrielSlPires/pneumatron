@@ -24,7 +24,7 @@ colnames(data) <- c("id",
                     "light",
                     "datetime")
 
-data$datetime <- lubridate::dmy_hm(data$datetime)
+data$datetime <- lubridate::dmy_hms(data$datetime)
 
 p <- ggplot(pneumatron_air_discharge(data),
             aes(datetime, pad)) +
