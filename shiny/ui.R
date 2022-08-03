@@ -12,6 +12,10 @@ sidebar <- dashboardSidebar(
              icon = icon("filter") #filter-list
     ),
     menuItem("Analysis",
+             menuSubItem("Filter Experiments",
+                                 tabName = "analysis_filter_view"),
+             menuSubItem("Plots",
+                                 tabName = "analysis_plots_view"),
              tabName = "analysis_view",
              icon = icon("chart-bar")
     ),
