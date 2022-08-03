@@ -29,8 +29,19 @@ sidebar <- dashboardSidebar(
            href = "https://github.com/GabrielSlPires/pneumatron")
 )
 
+body <- dashboardBody(
+    tabItems(
+        tabItem(
+            tabName = "running_view",
+            h3("Filter Your Data"),
+            actionButton("btn_refreash_data", "An action button"),
+            plotOutput("plot")
+        )
+    )
+)
+
 dashboardPage(
   dashboardHeader(title = "Pneumatron"),
   sidebar,
-  dashboardBody()
+  body
 )
