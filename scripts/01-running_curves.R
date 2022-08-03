@@ -1,4 +1,4 @@
-source("scripts/required_libs.R", local = TRUE)
+source("scripts/required_libs.R")
 
 #file_name <- "2022_08_01"
 
@@ -25,6 +25,15 @@ colnames(data) <- c("id",
                     "datetime")
 
 data$datetime <- lubridate::dmy_hms(data$datetime)
+
+#ggplot(data %>% 
+#         filter(log_line > 2),
+#       aes(log_line, pressure, color = measure)) +
+#  geom_point() +
+#  facet_wrap(~id,
+#             scales = "free_y",
+#             labeller = "label_both") +
+#  theme_bw()
 
 p <- ggplot(pneumatron_air_discharge(data),
             aes(datetime, pad)) +

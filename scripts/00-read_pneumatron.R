@@ -39,4 +39,18 @@ while (1) {
 }
 close(con)
 
+#file.opened <- function(path) {
+#  suppressWarnings(
+#    "try-error" %in% class(
+#      try(file(path, 
+#               open = "w"), 
+#          silent = TRUE
+#      )
+#    )
+#  )
+#}
+#
+#while (file.opened("teste.csv")) {
+#  Sys.time()
+#}
 
