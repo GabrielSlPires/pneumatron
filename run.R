@@ -1,3 +1,5 @@
+library(rstudioapi)
+
 #This command show your available COM ports
 listPorts()
 
@@ -29,4 +31,4 @@ jobRunScript("scripts/02-air_discharge.R",
              workingDir = getwd(),
              importEnv = TRUE)
 
-jobRunScript("scripts/app_bootstrap.R")
+jobRunScript("shiny/app_bootstrap.R")
