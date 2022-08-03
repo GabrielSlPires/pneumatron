@@ -19,8 +19,8 @@ server <- function(input, output) {
   output$pneumatron_plots <- renderUI({
 
     plot_output_list <- lapply(unique(data_ad()$id), function(i) {
-      boxname <- paste0("Pneumatron ID:", i)
-      date_range_name <- paste0("data_range_running_p", i)
+      boxname <- paste("Pneumatron ID:", i)
+      date_range_name <- paste0("date_range_running_p", i)
       plotname <- paste0("pneumatron_plot_p", i)
       column(width = 4,
              box(title = boxname,
@@ -40,10 +40,16 @@ server <- function(input, output) {
       my_i <- i
       plotname <- paste0("pneumatron_plot_p", my_i)
       output[[plotname]] <- renderPlot({
-        ggplot(filter(data_ad(), id == my_i),
+        datetime_filter <- input[[paste0("date_range_running_p", my_i)]]
+        ggplot(data_ad() %>%
+                 mutate(date = lubridate::date(datetime)) %>%
+                 filter(
+                  id == my_i,
+                  date >= datetime_filter[1],
+                  date <= datetime_filter[2]
+                 ),
                aes(datetime, pad)) +
           geom_point() +
-          labs(title = paste("Pneumatron id: ", my_i)) +
           scale_x_datetime(date_labels = "%b %d") +
           theme_bw()
       })
