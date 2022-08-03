@@ -20,10 +20,15 @@ server <- function(input, output) {
 
     plot_output_list <- lapply(unique(data_ad()$id), function(i) {
       boxname <- paste0("Pneumatron ID:", i)
+      date_range_name <- paste0("data_range_running_p", i)
       plotname <- paste0("pneumatron_plot_p", i)
       column(width = 4,
              box(title = boxname,
                  width = 12,
+                 dateRangeInput(date_range_name,
+                                label = 'Date range:',
+                                start = min(data_ad()[data_ad()$id == i,]$datetime),
+                                end = max(data_ad()[data_ad()$id == i,]$datetime)),
                  plotOutput(plotname)))
     })
     do.call(tagList, plot_output_list)
