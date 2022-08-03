@@ -29,4 +29,4 @@ jobRunScript("scripts/02-air_discharge.R",
              workingDir = getwd(),
              importEnv = TRUE)
 
-
+jobRunScript("scripts/app_bootstrap.R")
