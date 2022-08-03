@@ -5,8 +5,7 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     menuItem("Experiments Managment",
              tabName = "exp_managment_view",
-             badgeLabel = "new",
-             icon = icon("seedling") #filter-list
+             icon = icon("folder") #filter-list
     ),
     menuItem("Running Experiments",
              tabName = "running_view",
