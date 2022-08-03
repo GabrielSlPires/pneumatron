@@ -33,9 +33,13 @@ body <- dashboardBody(
     tabItems(
         tabItem(
             tabName = "running_view",
-            h3("Filter Your Data"),
-            actionButton("btn_refreash_data", "An action button"),
-            uiOutput("pneumatron_plots")
+            fluidRow(
+                actionButton("btn_refreash_data", "Refreash Data"),
+                h3("Running Experiments"),
+            ),
+            fluidRow(
+                uiOutput("pneumatron_plots")
+            )
         )
     )
 )

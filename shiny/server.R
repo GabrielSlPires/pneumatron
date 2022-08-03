@@ -19,16 +19,18 @@ server <- function(input, output) {
   output$pneumatron_plots <- renderUI({
 
     plot_output_list <- lapply(unique(data_ad()$id), function(i) {
-      boxname <- paste0("pneumatron_box_p", i)
+      boxname <- paste0("Pneumatron ID:", i)
       plotname <- paste0("pneumatron_plot_p", i)
-      box(boxname, plotOutput(plotname))
+      column(width = 4,
+             box(title = boxname,
+                 width = 12,
+                 plotOutput(plotname)))
     })
-
     do.call(tagList, plot_output_list)
   })
 
   #render each plot (running experiments)
-  for (i in c(8,10,12)) {
+  for (i in 1:100) {
     local({
       my_i <- i
       plotname <- paste0("pneumatron_plot_p", my_i)
