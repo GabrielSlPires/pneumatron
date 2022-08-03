@@ -35,7 +35,7 @@ body <- dashboardBody(
             tabName = "running_view",
             h3("Filter Your Data"),
             actionButton("btn_refreash_data", "An action button"),
-            plotOutput("plot")
+            uiOutput("pneumatron_plots")
         )
     )
 )

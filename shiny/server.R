@@ -15,12 +15,32 @@ server <- function(input, output) {
     get_pneumatron_ad(paste0("../data/raw_pneumatron/", file_name, ".csv"))
   })
 
-  print("teste")
-  output$plot <- renderPlot({
-    ggplot(data_ad(),
-           aes(datetime, pad)) +
-      geom_point() +
-      scale_x_datetime(date_labels = "%b %d") +
-      theme_bw()
+  #create plots (running experiments) for each diferent device in ui
+  output$pneumatron_plots <- renderUI({
+
+    plot_output_list <- lapply(unique(data_ad()$id), function(i) {
+      boxname <- paste0("pneumatron_box_p", i)
+      plotname <- paste0("pneumatron_plot_p", i)
+      box(boxname, plotOutput(plotname))
     })
+
+    do.call(tagList, plot_output_list)
+  })
+
+  #render each plot (running experiments)
+  for (i in c(8,10,12)) {
+    local({
+      my_i <- i
+      plotname <- paste0("pneumatron_plot_p", my_i)
+      output[[plotname]] <- renderPlot({
+        ggplot(filter(data_ad(), id == my_i),
+               aes(datetime, pad)) +
+          geom_point() +
+          labs(title = paste("Pneumatron id: ", my_i)) +
+          scale_x_datetime(date_labels = "%b %d") +
+          theme_bw()
+      })
+    })
+  }
+
  }
