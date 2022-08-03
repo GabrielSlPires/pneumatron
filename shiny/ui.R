@@ -3,13 +3,13 @@ library(shinydashboard)
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Experiments Managment",
-             tabName = "exp_managment_view",
-             icon = icon("folder") #filter-list
-    ),
     menuItem("Running Experiments",
              tabName = "running_view",
              icon = icon("filter") #filter-list
+    ),
+    menuItem("Experiments Managment",
+             tabName = "exp_managment_view",
+             icon = icon("folder") #filter-list
     ),
     menuItem("Analysis",
              menuSubItem("Filter Experiments",
