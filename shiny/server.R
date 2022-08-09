@@ -22,13 +22,19 @@ server <- function(input, output) {
       boxname <- paste("Pneumatron ID:", i)
       date_range_name <- paste0("date_range_running_p", i)
       plotname <- paste0("pneumatron_plot_p", i)
+      date_min = min(data_ad()[data_ad()$id == i,]$datetime)
+      date_max = max(data_ad()[data_ad()$id == i,]$datetime)
       column(width = 4,
              box(title = boxname,
+                 collapsible = TRUE,
+                 status = "primary",
                  width = 12,
                  dateRangeInput(date_range_name,
                                 label = 'Date range:',
-                                start = min(data_ad()[data_ad()$id == i,]$datetime),
-                                end = max(data_ad()[data_ad()$id == i,]$datetime)),
+                                start = date_min,
+                                end = date_max,
+                                min = date_min,
+                                max = date_max),
                  plotOutput(plotname)))
     })
     do.call(tagList, plot_output_list)
