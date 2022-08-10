@@ -40,6 +40,12 @@ body <- dashboardBody(
             fluidRow(
                 uiOutput("pneumatron_plots")
             )
+        ),
+        tabItem(
+          tabName = "analysis_filter_view",
+          fluidRow(
+            uiOutput("filter_experiment_boxes")
+          )
         )
     )
 )

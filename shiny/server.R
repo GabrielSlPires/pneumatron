@@ -64,4 +64,18 @@ server <- function(input, output) {
     })
   }
 
+  output$filter_experiment_boxes <- renderUI({
+    date_min = min(data_ad()$datetime)
+    date_max = max(data_ad()$datetime)
+    box(
+      width = 12,
+      sliderInput("filter_experiment_datetime",
+                  label = "Time range",
+                  min = date_min,
+                  max = date_max,
+                  value = c(date_min,
+                            date_max))
+    )
+  })
+
  }
