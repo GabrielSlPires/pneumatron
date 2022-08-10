@@ -64,6 +64,15 @@ server <- function(input, output) {
     })
   }
 
+  output$psi_plot_filter_view <- renderPlotly({
+      req(input$psi_file_input)
+      p <- ggplot(data_psi(),
+      aes(time, pot, group = 1)) +
+        geom_line() +
+        theme_bw()
+      ggplotly(p)
+  })
+
   #render data_psi in page
   output$psi_file_table <- renderTable({data_psi()})
 
@@ -89,28 +98,41 @@ server <- function(input, output) {
     date_max = max(data_ad()$datetime)
     box(
       width = 12,
-      column(
-        width = 12,
-        align = "center",
-        sliderInput("filter_experiment_datetime",
-                    label = "Time range",
-                    min = date_min,
-                    max = date_max,
-                    value = c(date_min,
-                              date_max),
-                    timeFormat = "%F %n %H:%M",
-                    step = 1,
-                    width = "90%")
+      fluidRow(
+        column(
+          width = 12,
+          align = "center",
+          sliderInput("filter_experiment_datetime",
+                      label = "Time range",
+                      min = date_min,
+                      max = date_max,
+                      value = c(date_min,
+                                date_max),
+                      timeFormat = "%F %H:%M",
+                      step = 1,
+                      width = "90%")
+        )
       ),
-      fileInput(
-        "psi_file_input",
-        "Select your file with Water Pressure values:",
-        accept = c(
-          "text/csv",
-          "text/comma-separated-values,text/plain",
-          ".csv")
+      fluidRow(
+        column(
+          width = 3,
+          HTML("The Water Pressure table needs to have two columns, <b>time</b> (dd.mm.yyyy hh:mm) and <b>pot</b> (MPa).<br>"),
+          br(),
+          fileInput(
+            "psi_file_input",
+            "Select your file with Water Pressure values:",
+            accept = c(
+              "text/csv",
+              "text/comma-separated-values,text/plain",
+              ".csv")
+          ),
+          tableOutput('psi_file_table')
+        ),
+        column(
+          width = 9,
+          plotlyOutput("psi_plot_filter_view")
+        )
       ),
-      tableOutput('psi_file_table')
     )
   })
 
