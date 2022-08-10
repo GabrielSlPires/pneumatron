@@ -46,6 +46,12 @@ body <- dashboardBody(
           fluidRow(
             uiOutput("filter_experiment_boxes")
           )
+        ),
+        tabItem(
+          tabName = "analysis_plots_view",
+          fluidRow(
+            uiOutput("analysis_plots")
+          )
         )
     )
 )
