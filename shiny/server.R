@@ -2,6 +2,7 @@ library(shiny)
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+library(plotly)
 source("../scripts/lib/pneumatron_air_discharge.R", local = TRUE)
 source("../scripts/lib/psi_extrapolation.R", local = TRUE)
 source("helper.R", local = TRUE)
@@ -35,7 +36,7 @@ server <- function(input, output) {
                                 end = date_max,
                                 min = date_min,
                                 max = date_max),
-                 plotOutput(plotname)))
+                 plotlyOutput(plotname)))
     })
     do.call(tagList, plot_output_list)
   })
@@ -45,9 +46,9 @@ server <- function(input, output) {
     local({
       my_i <- i
       plotname <- paste0("pneumatron_plot_p", my_i)
-      output[[plotname]] <- renderPlot({
+      output[[plotname]] <- renderPlotly({
         datetime_filter <- input[[paste0("date_range_running_p", my_i)]]
-        ggplot(data_ad() %>%
+        p <- ggplot(data_ad() %>%
                  mutate(date = lubridate::date(datetime)) %>%
                  filter(
                   id == my_i,
@@ -58,6 +59,7 @@ server <- function(input, output) {
           geom_point() +
           scale_x_datetime(date_labels = "%b %d") +
           theme_bw()
+          ggplotly(p)
       })
     })
   }
