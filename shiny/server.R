@@ -69,12 +69,19 @@ server <- function(input, output) {
     date_max = max(data_ad()$datetime)
     box(
       width = 12,
-      sliderInput("filter_experiment_datetime",
-                  label = "Time range",
-                  min = date_min,
-                  max = date_max,
-                  value = c(date_min,
-                            date_max))
+      column(
+        width = 12,
+        align = "center",
+        sliderInput("filter_experiment_datetime",
+                    label = "Time range",
+                    min = date_min,
+                    max = date_max,
+                    value = c(date_min,
+                              date_max),
+                    timeFormat = "%F %n %H:%M",
+                    step = 1,
+                    width = "90%")
+      )
     )
   })
 
