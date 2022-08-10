@@ -114,29 +114,35 @@ server <- function(input, output) {
   })
 
   #Analysis plots
-  output$pneumatron_plot_psi_pad <- renderPlotly({
+  output$pneumatron_plot_psi_pad <- renderPlot({
     p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
       geom_point() +
-      theme_bw()
-    ggplotly(p)
+      theme_bw() +
+      xlab(expression(paste(psi, " (MPa)"))) +
+      ylab("Air Discharge (%)")
+    p
   })
-  output$pneumatron_plot_psi_ad_ul <- renderPlotly({
+  output$pneumatron_plot_psi_ad_ul <- renderPlot({
     p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
       geom_point() +
-      theme_bw()
-    ggplotly(p)
+      theme_bw() +
+      xlab(expression(paste(psi, " (MPa)"))) +
+      ylab(expression(paste("Air Discharge (", mu, "l)")))
+    p
   })
-  output$pneumatron_plot_time_psi <- renderPlotly({
+  output$pneumatron_plot_time_psi <- renderPlot({
     p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
       geom_point() +
-      theme_bw()
-    ggplotly(p)
+      theme_bw() +
+      ylab(expression(paste(psi, " (MPa)")))
+    p
   })
-  output$pneumatron_plot_time_ad_ul <- renderPlotly({
-    p <- ggplot(data_ad_experiment_filter(), aes(datetime, pad)) +
+  output$pneumatron_plot_time_ad_ul <- renderPlot({
+    p <- ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
       geom_point() +
-      theme_bw()
-    ggplotly(p)
+      theme_bw() +
+      ylab(expression(paste("Air Discharge (", mu, "l)")))
+    p
   })
 
   output$analysis_plots <- renderUI({
@@ -149,21 +155,21 @@ server <- function(input, output) {
             fluidRow(
               column(
                 width = 6,
-                plotlyOutput("pneumatron_plot_psi_pad")
+                plotOutput("pneumatron_plot_psi_pad")
               ),
               column(
                 width = 6,
-                plotlyOutput("pneumatron_plot_psi_ad_ul")
+                plotOutput("pneumatron_plot_psi_ad_ul")
               )
             ),
             fluidRow(
               column(
                 width = 6,
-                plotlyOutput("pneumatron_plot_time_psi")
+                plotOutput("pneumatron_plot_time_psi")
               ),
               column(
                 width = 6,
-                plotlyOutput("pneumatron_plot_time_ad_ul")
+                plotOutput("pneumatron_plot_time_ad_ul")
               )
             )
           )
