@@ -113,12 +113,71 @@ server <- function(input, output) {
     ggplotly(p)
   })
 
+  #Analysis plots
+  output$pneumatron_plot_psi_pad <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
+  output$pneumatron_plot_psi_ad_ul <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
+  output$pneumatron_plot_time_psi <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
+  output$pneumatron_plot_time_ad_ul <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(datetime, pad)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
+
   output$analysis_plots <- renderUI({
-    if(is.null(input$psi_file_input)){
-      p("Water Pressure file is required, please attached it in Analysis - Filter Experiment View")
-    } else {
-      p("Water Pressure file attached")
-    }
+    fluidRow(
+      column(
+        width = 12,
+        if(!is.null(input$psi_file_input)){
+          box(
+            width = 12,
+            fluidRow(
+              column(
+                width = 6,
+                plotlyOutput("pneumatron_plot_psi_pad")
+              ),
+              column(
+                width = 6,
+                plotlyOutput("pneumatron_plot_psi_ad_ul")
+              )
+            ),
+            fluidRow(
+              column(
+                width = 6,
+                plotlyOutput("pneumatron_plot_time_psi")
+              ),
+              column(
+                width = 6,
+                plotlyOutput("pneumatron_plot_time_ad_ul")
+              )
+            )
+          )
+          } else {
+            fluidRow(
+              column(
+                width = 12,
+                align = "center",
+                HTML("Water Pressure file is required, please attached it in <b>Analysis</b> -> <b>Filter Experiment</b> View!")
+              )
+            )
+          }
+      )
+    )
   })
 
   output$filter_experiment_boxes <- renderUI({
