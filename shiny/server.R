@@ -91,6 +91,14 @@ server <- function(input, output) {
     return(df)
   })
 
+  output$analysis_plots <- renderUI({
+    if(is.null(input$psi_file_input)){
+      p("Water Pressure file is required, please attached it in Analysis - Filter Experiment View")
+    } else {
+      p("Water Pressure file attached")
+    }
+  })
+
   output$filter_experiment_boxes <- renderUI({
     date_min = min(data_ad()$datetime)
     date_max = max(data_ad()$datetime)
@@ -108,7 +116,8 @@ server <- function(input, output) {
                                 date_max),
                       timeFormat = "%F %H:%M",
                       step = 1,
-                      width = "90%")
+                      width = "90%"
+          )
         )
       ),
       fluidRow(
