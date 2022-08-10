@@ -64,6 +64,26 @@ server <- function(input, output) {
     })
   }
 
+  #render data_psi in page
+  output$psi_file_table <- renderTable({data_psi()})
+
+  #read data_psi file
+  data_psi <- reactive({
+    #read only if file is uploaded
+    req(input$psi_file_input)
+    tryCatch(
+      {
+        df <- data.table::fread(input$psi_file_input$datapath)
+      },
+      error = function(e) {
+        stop(safeError(e))
+      }
+    )
+    return(df)
+  })
+
+
+
   output$filter_experiment_boxes <- renderUI({
     date_min = min(data_ad()$datetime)
     date_max = max(data_ad()$datetime)
@@ -81,7 +101,16 @@ server <- function(input, output) {
                     timeFormat = "%F %n %H:%M",
                     step = 1,
                     width = "90%")
-      )
+      ),
+      fileInput(
+        "psi_file_input",
+        "Select your file with Water Pressure values:",
+        accept = c(
+          "text/csv",
+          "text/comma-separated-values,text/plain",
+          ".csv")
+      ),
+      tableOutput('psi_file_table')
     )
   })
 
