@@ -18,6 +18,5 @@ get_pneumatron_ad <- function(file_name) {
                         "co2_cozir",
                         "light",
                         "datetime")
-    #add datetime filter?
     return(pneumatron_air_discharge(data))
 }
