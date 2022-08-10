@@ -7,10 +7,10 @@ sidebar <- dashboardSidebar(
              tabName = "running_view",
              icon = icon("filter") #filter-list
     ),
-    menuItem("Experiments Managment",
-             tabName = "exp_managment_view",
-             icon = icon("folder") #filter-list
-    ),
+    #menuItem("Experiments Managment",
+    #         tabName = "exp_managment_view",
+    #         icon = icon("folder") #filter-list
+    #),
     menuItem("Analysis",
              menuSubItem("Filter Experiments",
                                  tabName = "analysis_filter_view"),
