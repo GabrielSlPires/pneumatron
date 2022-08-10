@@ -9,7 +9,7 @@ source("helper.R", local = TRUE)
 
 file_name <- "2022_08_01"
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   #import data when press the button
   data_ad <- reactive({
     input$btn_refreash_data
@@ -145,6 +145,53 @@ server <- function(input, output) {
     p
   })
 
+  observeEvent(input$btn_save_data, {
+    if(input$file_name_save == ""){
+      session$sendCustomMessage(type = 'testmessage',
+        message = 'You need to write a file name to save!')
+    } else {
+      #Save plots
+      ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
+        geom_point() +
+        theme_bw() +
+        xlab(expression(paste(psi, " (MPa)"))) +
+        ylab("Air Discharge (%)")
+      ggsave(paste0("../fig/", input$file_name_save, "_psi_pad.png"))
+      ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
+        geom_point() +
+        theme_bw() +
+        xlab(expression(paste(psi, " (MPa)"))) +
+        ylab(expression(paste("Air Discharge (", mu, "l)")))
+      ggsave(paste0("../fig/", input$file_name_save, "_psi_ad_ul.png"))
+      ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
+        geom_point() +
+        theme_bw() +
+        ylab(expression(paste(psi, " (MPa)")))
+      ggsave(paste0("../fig/", input$file_name_save, "_time_psi.png"))
+      ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
+        geom_point() +
+        theme_bw() +
+        ylab(expression(paste("Air Discharge (", mu, "l)")))
+      ggsave(paste0("../fig/", input$file_name_save, "_time_ad_ul.png"))
+
+      #Save Table
+      write.csv(data_ad_experiment_filter(),
+                paste0("../result/", input$file_name_save, ".csv"),
+                row.names = FALSE)
+
+      #Save analysis log
+      datetime_filter <- input$filter_experiment_datetime
+      fileConn <- file(paste0("../result/analysi_log_", input$file_name_save, ".txt"))
+      writeLines(c(paste("pneumatron id:", input$pneumatron_id),
+                   paste("initial datetime:", datetime_filter[1]),
+                   paste("final datetime:", datetime_filter[2]),
+                   paste("water pressure file:", input$psi_file_input$name)), fileConn)
+      close(fileConn) 
+      session$sendCustomMessage(type = 'testmessage',
+        message = 'Your experiment data is saved! Please, check "fig" and "result" folders')
+    }
+  })
+
   output$analysis_plots <- renderUI({
     fluidRow(
       column(
@@ -152,6 +199,26 @@ server <- function(input, output) {
         if(!is.null(input$psi_file_input)){
           box(
             width = 12,
+            fluidRow(
+              #column(
+              #  width = 4,
+              #  textInput(
+              #    "title_analysis_plots",
+              #    "Graphic Title:"
+              #  )
+              #),
+              column(
+                width = 4,
+                textInput(
+                  "file_name_save",
+                  "File Name (Save):"
+                )
+              ),
+              column(
+                width = 4,
+                actionButton("btn_save_data", "Save"),
+              )
+            ),
             fluidRow(
               column(
                 width = 6,

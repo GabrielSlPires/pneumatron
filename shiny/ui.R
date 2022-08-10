@@ -30,6 +30,7 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+  tags$head(tags$script(src = "message-handler.js")),
     tabItems(
         tabItem(
             tabName = "running_view",
