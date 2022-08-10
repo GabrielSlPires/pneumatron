@@ -91,6 +91,21 @@ server <- function(input, output) {
     return(df)
   })
 
+  data_ad_experiment_filter <- reactive({
+    datetime_filter <- input$filter_experiment_datetime
+    data_ad() %>%
+      filter(datetime >= datetime_filter[1],
+             datetime <= datetime_filter[2],
+             id == input$pneumatron_id)
+  })
+
+  output$pneumatron_filtered_plot <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
+
   output$analysis_plots <- renderUI({
     if(is.null(input$psi_file_input)){
       p("Water Pressure file is required, please attached it in Analysis - Filter Experiment View")
@@ -118,6 +133,20 @@ server <- function(input, output) {
                       step = 1,
                       width = "90%"
           )
+        )
+      ),
+      fluidRow(
+        column(
+          width = 3,
+          selectInput(
+            inputId = "pneumatron_id",
+            label = "Select Pneumatron ID",
+            choices = unique(data_ad()$id)
+          )
+        ),
+        column(
+          width = 9,
+          plotlyOutput("pneumatron_filtered_plot")
         )
       ),
       fluidRow(
