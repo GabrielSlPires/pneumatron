@@ -93,10 +93,17 @@ server <- function(input, output) {
 
   data_ad_experiment_filter <- reactive({
     datetime_filter <- input$filter_experiment_datetime
-    data_ad() %>%
+    data <- data_ad() %>%
       filter(datetime >= datetime_filter[1],
              datetime <= datetime_filter[2],
-             id == input$pneumatron_id)
+             id == input$pneumatron_id) %>%
+      mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
+    if(!is.null(input$psi_file_input)){
+      psi <- data_psi()
+      psi$time <- dmy_hm(psi$time)
+      data <- psi_extraplolation(data, psi)
+    }
+    return(data)
   })
 
   output$pneumatron_filtered_plot <- renderPlotly({
