@@ -1,8 +1,16 @@
-library("serial")
-library("lubridate")
-library("dplyr")
-library("ggplot2")
-library("rstudioapi")
+packages <- c(
+    "data.table",
+    "dplyr",
+    "ggplot2",
+    "gridExtra",
+    "lubridate",
+    "plotly",
+    "rstudioapi",
+    "serial",
+    "shiny",
+    "shinydashboard"
+)
 
-source("scripts/lib/pneumatron_air_discharge.R", local = TRUE)
-source("scripts/lib/psi_extrapolation.R", local = TRUE)
+install.packages(setdiff(packages, rownames(installed.packages())))
+
+rm(packages)
