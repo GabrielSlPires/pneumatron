@@ -143,6 +143,7 @@ server <- function(input, output, session) {
                 size = 1) +
       geom_vline(xintercept = p50.pad) + 
       theme_bw() +
+      ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
       ylab("Air Discharge (%)") +
       annotation_custom(tableGrob(p50_table,
@@ -159,6 +160,7 @@ server <- function(input, output, session) {
     p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
       geom_point() +
       theme_bw() +
+      ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
       ylab(expression(paste("Air Discharge (", mu, "l)")))
     p
@@ -168,6 +170,7 @@ server <- function(input, output, session) {
     p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
       geom_point() +
       theme_bw() +
+      ggtitle(input$title_analysis_plots) +
       ylab(expression(paste(psi, " (MPa)")))
     p
   })
@@ -176,6 +179,7 @@ server <- function(input, output, session) {
     p <- ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
       geom_point() +
       theme_bw() +
+      ggtitle(input$title_analysis_plots) +
       ylab(expression(paste("Air Discharge (", mu, "l)")))
     p
   })
@@ -186,7 +190,7 @@ server <- function(input, output, session) {
         message = 'You need to write a file name to save!')
     } else {
       #Save plots
-      ggsave(paste0("../fig/", input$file_name_save, "_psi_pad.png"), plot_psi_pad)
+      ggsave(paste0("../fig/", input$file_name_save, "_psi_pad.png"), plot_psi_pad())
       ggsave(paste0("../fig/", input$file_name_save, "_psi_ad_ul.png"), plot = plot_psi_ad_ul())
       ggsave(paste0("../fig/", input$file_name_save, "_time_psi.png"), plot_time_psi())
       ggsave(paste0("../fig/", input$file_name_save, "_time_ad_ul.png"), plot_time_ad_ul())
@@ -198,7 +202,7 @@ server <- function(input, output, session) {
 
       #Save analysis log
       datetime_filter <- input$filter_experiment_datetime
-      fileConn <- file(paste0("../result/analysi_log_", input$file_name_save, ".txt"))
+      fileConn <- file(paste0("../result/analysis_log_", input$file_name_save, ".txt"))
       writeLines(c(paste("pneumatron id:", input$pneumatron_id),
                    paste("initial datetime:", datetime_filter[1]),
                    paste("final datetime:", datetime_filter[2]),
@@ -217,13 +221,13 @@ server <- function(input, output, session) {
           box(
             width = 12,
             fluidRow(
-              #column(
-              #  width = 4,
-              #  textInput(
-              #    "title_analysis_plots",
-              #    "Graphic Title:"
-              #  )
-              #),
+              column(
+                width = 4,
+                textInput(
+                  "title_analysis_plots",
+                  "Graphic Title:"
+                )
+              ),
               column(
                 width = 4,
                 textInput(
