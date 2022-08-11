@@ -32,7 +32,7 @@ server <- function(input, output, session) {
                  width = 12,
                  dateRangeInput(date_range_name,
                                 label = 'Date range:',
-                                start = date_min,
+                                start = as.Date(date_max) - 7,
                                 end = date_max,
                                 min = date_min,
                                 max = date_max),
