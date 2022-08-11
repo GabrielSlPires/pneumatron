@@ -3,8 +3,8 @@ library(lubridate)
 library(ggplot2)
 library(dplyr)
 library(plotly)
-source("../scripts/lib/pneumatron_air_discharge.R", local = TRUE)
-source("../scripts/lib/psi_extrapolation.R", local = TRUE)
+library(gridExtra)
+
 source("helper.R", local = TRUE)
 
 file_name <- "2022_08_01"
@@ -55,9 +55,10 @@ server <- function(input, output, session) {
                   date >= datetime_filter[1],
                   date <= datetime_filter[2]
                  ),
-               aes(datetime, pad)) +
+               aes(datetime, ad_ul)) +
           geom_point() +
           scale_x_datetime(date_labels = "%b %d") +
+          ylab("Air Discharge (ul)") +
           theme_bw()
           ggplotly(p)
       })
