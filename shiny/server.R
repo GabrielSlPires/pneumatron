@@ -114,7 +114,9 @@ server <- function(input, output, session) {
   })
 
   #Analysis plots
-  output$pneumatron_plot_psi_pad <- renderPlot({
+  output$pneumatron_plot_psi_pad <- renderPlot(plot_psi_pad())
+  plot_psi_pad <- reactive({
+    #apply non linear fit
     p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
       geom_point() +
       theme_bw() +
@@ -122,7 +124,8 @@ server <- function(input, output, session) {
       ylab("Air Discharge (%)")
     p
   })
-  output$pneumatron_plot_psi_ad_ul <- renderPlot({
+  output$pneumatron_plot_psi_ad_ul <- renderPlot(plot_psi_ad_ul())
+  plot_psi_ad_ul <- reactive({
     p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
       geom_point() +
       theme_bw() +
@@ -130,14 +133,16 @@ server <- function(input, output, session) {
       ylab(expression(paste("Air Discharge (", mu, "l)")))
     p
   })
-  output$pneumatron_plot_time_psi <- renderPlot({
+  output$pneumatron_plot_time_psi <- renderPlot(plot_time_psi())
+  plot_time_psi <- reactive({
     p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
       geom_point() +
       theme_bw() +
       ylab(expression(paste(psi, " (MPa)")))
     p
   })
-  output$pneumatron_plot_time_ad_ul <- renderPlot({
+  output$pneumatron_plot_time_ad_ul <- renderPlot(plot_time_ad_ul())
+  plot_time_ad_ul <- reactive({
     p <- ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
       geom_point() +
       theme_bw() +
@@ -151,28 +156,10 @@ server <- function(input, output, session) {
         message = 'You need to write a file name to save!')
     } else {
       #Save plots
-      ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
-        geom_point() +
-        theme_bw() +
-        xlab(expression(paste(psi, " (MPa)"))) +
-        ylab("Air Discharge (%)")
-      ggsave(paste0("../fig/", input$file_name_save, "_psi_pad.png"))
-      ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
-        geom_point() +
-        theme_bw() +
-        xlab(expression(paste(psi, " (MPa)"))) +
-        ylab(expression(paste("Air Discharge (", mu, "l)")))
-      ggsave(paste0("../fig/", input$file_name_save, "_psi_ad_ul.png"))
-      ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
-        geom_point() +
-        theme_bw() +
-        ylab(expression(paste(psi, " (MPa)")))
-      ggsave(paste0("../fig/", input$file_name_save, "_time_psi.png"))
-      ggplot(data_ad_experiment_filter(), aes(datetime, ad_ul)) +
-        geom_point() +
-        theme_bw() +
-        ylab(expression(paste("Air Discharge (", mu, "l)")))
-      ggsave(paste0("../fig/", input$file_name_save, "_time_ad_ul.png"))
+      ggsave(paste0("../fig/", input$file_name_save, "_psi_pad.png"), plot_psi_pad)
+      ggsave(paste0("../fig/", input$file_name_save, "_psi_ad_ul.png"), plot = plot_psi_ad_ul())
+      ggsave(paste0("../fig/", input$file_name_save, "_time_psi.png"), plot_time_psi())
+      ggsave(paste0("../fig/", input$file_name_save, "_time_ad_ul.png"), plot_time_ad_ul())
 
       #Save Table
       write.csv(data_ad_experiment_filter(),
