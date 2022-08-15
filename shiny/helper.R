@@ -93,6 +93,14 @@ psi_extraplolation <- function(pneumatron, #pneumatron data file
            pot = all_of(data_psi_pot_column))
   
   psi_predict <- c()
+  
+  model <- lm(pot ~ psi_time_estimate, data = data_psi[c(1, 2),])
+  a <- pneumatron %>% 
+    filter(psi_time_estimate < data_psi$psi_time_estimate[1]) %>% 
+    select(psi_time_estimate)
+  #predict psi in function of time
+  psi_predict <- c(psi_predict, predict(model, a))
+
   #for each line of data_psi, predict psi value with linear model
   for (i in seq(2, nrow(data_psi))) {
     #generate model of psi in function of time
@@ -111,7 +119,7 @@ psi_extraplolation <- function(pneumatron, #pneumatron data file
     filter(psi_time_estimate >= data_psi$psi_time_estimate[i]) %>% 
     select(psi_time_estimate)
   psi_predict <- c(psi_predict, predict(model, a))
-  #add psi column
+  #add psi column 
   pneumatron$psi <- as.numeric(psi_predict)
   #return column names to original form
   pneumatron <- pneumatron %>%
