@@ -3,20 +3,15 @@ get_pneumatron_ad <- function(file_name) {
     colnames(data) <- c("id",
                         "ms",
                         "temp1",
-                        "atm_pres1",
                         "humid1",
+                        "pressure",
                         "temp2",
-                        "atm_pres2",
                         "humid2",
+                        "pressure2",
                         "seq",
                         "measure",
                         "log_line",
-                        "pressure",
-                        "pressure2",
-                        "co2",
-                        "voc",
-                        "co2_cozir",
-                        "light",
+                        "volt",
                         "datetime")
     return(pneumatron_air_discharge(data))
 }
