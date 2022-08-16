@@ -7,7 +7,7 @@ library(gridExtra)
 
 source("helper.R", local = TRUE)
 
-file_name <- "2022_08_01"
+#file_name <- "2022_08_01"
 
 server <- function(input, output, session) {
   #import data when press the button
