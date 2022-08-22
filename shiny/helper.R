@@ -1,18 +1,47 @@
 get_pneumatron_ad <- function(file_name) {
-    data <- data.table::fread(file_name)
-    colnames(data) <- c("id",
-                        "ms",
-                        "temp1",
-                        "humid1",
-                        "pressure",
-                        "temp2",
-                        "humid2",
-                        "pressure2",
-                        "seq",
-                        "measure",
-                        "log_line",
-                        "volt",
-                        "datetime")
+    open <- TRUE
+    try({
+      data <- data.table::fread(file_name,
+                                select = 1:18,
+                                col.names = c("id",
+                                              "ms",
+                                              "temp1",
+                                              "atm_pres1",
+                                              "humid1",
+                                              "temp2",
+                                              "atm_pres2",
+                                              "humid2",
+                                              "seq",
+                                              "measure",
+                                              "log_line",
+                                              "pressure",
+                                              "pressure2",
+                                              "co2",
+                                              "voc",
+                                              "co2_cozir",
+                                              "light",
+                                              "datetime"))
+      open <- FALSE
+    }, silent = FALSE)
+    if (open) {
+      message("new version")
+      data <- data.table::fread(file_name,
+                                select = 1:13,
+                                col.names = c("id",
+                                              "ms",
+                                              "temp1",
+                                              "pressure",
+                                              "humid1",
+                                              "temp2",
+                                              "pressure2",
+                                              "humid2",
+                                              "seq",
+                                              "measure",
+                                              "log_line",
+                                              "volt",
+                                              "datetime")) 
+      data$pressure = data$pressure/10
+    }
     return(pneumatron_air_discharge(data))
 }
 
@@ -53,6 +82,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
     dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
                   !is.na(id)) %>% 
     dplyr::group_by(id, measure) %>% #separete measures and plants
+    dplyr::filter(n() == 2) %>% 
     dplyr::summarise(pf = pressure[which(log_line == pf_s*2)], #final pressure
                      pi = pressure[which(log_line == pi_s*2)], #initial pressure
                      #using abs(), due to devices with relative and absotute pressures
