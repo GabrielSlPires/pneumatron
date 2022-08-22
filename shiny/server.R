@@ -102,7 +102,7 @@ server <- function(input, output, session) {
     if(!is.null(input$psi_file_input)){
       psi <- data_psi()
       psi$time <- dmy_hm(psi$time)
-      data <- psi_extraplolation(data, psi)
+      data <- extrapolated_wp(data, psi)
     }
     return(data)
   })

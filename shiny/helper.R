@@ -99,7 +99,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
   return(data)
 }
 
-psi_extraplolation <- function(pneumatron, #pneumatron data file
+extrapolated_wp <- function(pneumatron, #pneumatron data file
                                data_psi, #pressure pump data
                                pneumatron_time_column = "datetime", #pneumatron time column name
                                data_psi_time_column = "time", #data_psi time column name
