@@ -4,3 +4,6 @@
 data/
 fig/
 result/
+devices/
+pneumatron-dashboard.docx
+shiny/.Rhistory
