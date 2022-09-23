@@ -47,13 +47,46 @@ get_pneumatron_ad <- function(file_name) {
                                                 "log_line",
                                                 "volt",
                                                 "datetime")) 
-                                              "datetime")) 
-                                                "datetime")) 
         data$pressure = data$pressure/10
         open <- FALSE
         message("data opened")
       }
     }, silent = TRUE)
+
+    #Pneumatron V3 if read with old script
+    try({
+      if (open) {
+        message("try v3 old")
+        data <- data.table::fread(file_name,
+                                  header = FALSE) 
+
+        data <- data.frame(
+          reshape2::colsplit(string = data$V1,
+                             pattern = ",",
+                             names = c("id",
+                                       "ms",
+                                       "temp1",
+                                       "pressure",
+                                       "humid1",
+                                       "temp2",
+                                       "atm_pres2",
+                                       "humid2",
+                                       "seq",
+                                       "measure",
+                                       "log_line",
+                                       "voltage"
+                             )
+          ),
+          datetime = lubridate::ymd_hm(data$V2))
+        data$voltage = as.numeric(gsub("\n", "", data$voltage))
+
+        data <- dplyr::filter(data, !is.na(datetime))
+
+        open <- FALSE
+        message("data opened")
+      }
+    }, silent = TRUE)
+
     return(pneumatron_air_discharge(data))
 }
 
