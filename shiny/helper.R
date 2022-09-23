@@ -1,6 +1,9 @@
 get_pneumatron_ad <- function(file_name) {
     open <- TRUE
+    
+    #Pneumatron V2
     try({
+      message("try V2")
       data <- data.table::fread(file_name,
                                 select = 1:18,
                                 col.names = c("id",
@@ -22,26 +25,35 @@ get_pneumatron_ad <- function(file_name) {
                                               "light",
                                               "datetime"))
       open <- FALSE
+      message("data opened")
     }, silent = FALSE)
-    if (open) {
-      message("new version")
-      data <- data.table::fread(file_name,
-                                select = 1:13,
-                                col.names = c("id",
-                                              "ms",
-                                              "temp1",
-                                              "pressure",
-                                              "humid1",
-                                              "temp2",
-                                              "pressure2",
-                                              "humid2",
-                                              "seq",
-                                              "measure",
-                                              "log_line",
-                                              "volt",
+
+    #Pneumatron V3
+    try({
+      if (open) {
+        message("try V3")
+        data <- data.table::fread(file_name,
+                                  select = 1:13,
+                                  col.names = c("id",
+                                                "ms",
+                                                "temp1",
+                                                "pressure",
+                                                "humid1",
+                                                "temp2",
+                                                "pressure2",
+                                                "humid2",
+                                                "seq",
+                                                "measure",
+                                                "log_line",
+                                                "volt",
+                                                "datetime")) 
                                               "datetime")) 
-      data$pressure = data$pressure/10
-    }
+                                                "datetime")) 
+        data$pressure = data$pressure/10
+        open <- FALSE
+        message("data opened")
+      }
+    }, silent = TRUE)
     return(pneumatron_air_discharge(data))
 }
 
