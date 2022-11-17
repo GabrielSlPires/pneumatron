@@ -4,7 +4,7 @@ source("scripts/required_libs.R")
 #This command show your available COM ports
 serial::listPorts()
 
-reciver_serial_port <- "COM12" #define pneumatron receiver COM port
+reciver_serial_port <- c("COM12") #define pneumatron receiver COM port
 file_name <- "pneumatron_database" #define where to save your files. change for week files?
 
 #To start reading the pneumatron
