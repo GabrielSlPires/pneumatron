@@ -146,7 +146,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                   !is.na(id)) %>% 
     dplyr::group_by(id,
                     measure,
-                    datetime = lubridate::floor_date(datetime,
+                    datetime_group = lubridate::floor_date(datetime,
                                                      unit = "hour")
                     ) %>% #separete measures and plants
     dplyr::filter(n() == 2) %>% 
@@ -157,6 +157,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
                      c = (abs(pf - pi))/(R*temp),
                      n_mol = (p_atm*1000*Vr)/(R*temp),
+                    datetime = datetime[which(log_line == pi_s*2)],
                      .groups = "drop") %>% 
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
