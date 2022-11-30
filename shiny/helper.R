@@ -53,6 +53,24 @@ get_pneumatron_ad <- function(file_name) {
       }
     }, silent = TRUE)
 
+    #Pneumatron V2 - update
+    try({
+      if (open) {
+        message("try V2 - update")
+        data <- data.table::fread(file_name,
+                                  select = 1:6,
+                                  col.names = c("id",
+                                                "seq",
+                                                "measure",
+                                                "log_line",
+                                                "pressure",
+                                                "datetime")) 
+        open <- FALSE
+        message("data opened")
+      }
+    }, silent = TRUE)
+
+
     #Pneumatron V3 if read with old script
     try({
       if (open) {
