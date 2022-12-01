@@ -1,3 +1,5 @@
+options(shiny.maxRequestSize=300*1024^2)
+
 library(shiny)
 library(lubridate)
 library(ggplot2)
@@ -12,11 +14,12 @@ source("helper.R", local = TRUE)
 server <- function(input, output, session) {
   #import data when press the button
   data_ad <- reactive({
+    req(input$file_database)
     input$btn_refreash_data
-    get_pneumatron_ad(paste0("../data/raw_pneumatron/", file_name, ".csv"))
+    get_pneumatron_ad(input$file_database$datapath)
   })
 
-  #create plots (running experiments) for each diferent device in ui
+  #create plots (running experiments) for each different device in ui
   output$pneumatron_plots <- renderUI({
 
     plot_output_list <- lapply(unique(data_ad()$id), function(i) {
