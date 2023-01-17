@@ -12,22 +12,22 @@ def com_ports():
     return(ports)
 
 ports = com_ports()
-ser = {port: serial.Serial(port, 115200) for port in ports}
+ser = {port: serial.Serial(port, 115200, timeout=0) for port in ports}
 
-while TRUE:
+while True:
     for port in ports:
-        buffer_size = ser[port].inWaiting()
-        measures = ser[port].read(buffer_size)
+        measures = ser[port].readlines()
         for measure in measures:
-            now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-            with open('py_data.txt', 'a') as f:
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open('data/raw_pneumatron/pneumatron_database.csv', 'a') as f:
                 #separar por virgular??
-                line = f'{measure.decode("utf-8")[:-1]},{now}'
-                f.write(line)
+                line = f'{measure.decode("utf-8")[:-1]},{now}\n'
+                #filtrar ,, e , na primeira posicao
+                if line.count(',') == 5:
+                    f.write(line)
                 f.close()
-        #aumentar tempo de espera para 15min?
-    time.sleep(5)
     if com_ports() != ports:
+        print("Update COM Ports!")
         ports = com_ports()
         ser = {port: serial.Serial(port, 115200) for port in ports}
 
