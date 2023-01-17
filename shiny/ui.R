@@ -35,10 +35,30 @@ body <- dashboardBody(
         tabItem(
             tabName = "running_view",
             fluidRow(
-              column(
+              h3("Running Experiment")
+            ),
+            fluidRow(
+              box(
+                title = "Database",
+                collapsible = TRUE,
+                status = "primary",
                 width = 12,
-                actionButton("btn_refreash_data", "Refreash Data"),
-                h3("Running Experiment"),
+                column(
+                  width = 6,
+                  fileInput(
+                    "file_database",
+                    "Select a file to change your database",
+                    accept = c(
+                      "text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv"),
+                    width = "100%"
+                  )
+                ),
+                column(
+                  width = 6,
+                  actionButton("btn_refreash_data", "Refreash Data"),
+                )
               )
             ),
             fluidRow(

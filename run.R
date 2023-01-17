@@ -11,4 +11,5 @@ file_name <- "pneumatron_database" #define where to save your files. change for 
 rstudioapi::jobRunScript("scripts/00-read_pneumatron.R", importEnv = TRUE)
 
 #Launch Dashboard 
-rstudioapi::jobRunScript("shiny/app_bootstrap.R", importEnv = TRUE)
+rstudioapi::jobRunScript("shiny/app_bootstrap.R")
+
