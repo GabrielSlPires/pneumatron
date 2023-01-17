@@ -9,6 +9,8 @@ library(gridExtra)
 
 source("helper.R", local = TRUE)
 
+file_name <- "pneumatron_database" #define where to save your files. change for week files?
+
 #file_name <- "2022_08_01"
 
 server <- function(input, output, session) {

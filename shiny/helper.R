@@ -145,9 +145,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
     dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
                   !is.na(id)) %>% 
     dplyr::group_by(id,
-                    measure,
-                    datetime_group = lubridate::floor_date(datetime,
-                                                     unit = "hour")
+                    measure
                     ) %>% #separete measures and plants
     dplyr::filter(n() == 2) %>% 
     dplyr::summarise(pf = pressure[which(log_line == pf_s*2)], #final pressure
