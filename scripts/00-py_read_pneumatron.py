@@ -1,6 +1,8 @@
 import serial.tools.list_ports
 from datetime import datetime
 import time
+import os
+import sys
 
 def com_ports():
     ports_name = serial.tools.list_ports.comports()
@@ -12,23 +14,32 @@ def com_ports():
     return(ports)
 
 ports = com_ports()
-ser = {port: serial.Serial(port, 115200, timeout=0) for port in ports}
+ser = {port: serial.Serial(port, 115200, timeout=0.01) for port in ports}
 
-while True:
-    for port in ports:
-        measures = ser[port].readlines()
-        for measure in measures:
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            with open('data/raw_pneumatron/pneumatron_database.csv', 'a') as f:
-                #separar por virgular??
-                line = f'{measure.decode("utf-8")[:-1]},{now}\n'
-                #filtrar ,, e , na primeira posicao
-                if line.count(',') == 5:
-                    f.write(line)
-                f.close()
-    if com_ports() != ports:
-        print("Update COM Ports!")
-        ports = com_ports()
-        ser = {port: serial.Serial(port, 115200) for port in ports}
-
-
+try:
+ while True:
+     for port in ports:
+         message = ser[port].readline()
+         if len(message) > 2:
+             measure = message.decode()
+             if measure.count(",") == 4:
+                 file = "pneumatron_database-V2"
+             if measure.count(",") == 11:
+                 file = "pneumatron_database-V3"
+             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+             try:
+              with open(f'data/raw_pneumatron/{file}.csv', 'a') as f:
+                  del file
+                  line = f'{measure[:-1]},{now}\n'
+                  f.write(line)
+                  f.close()
+             except Exception:
+              pass
+     new_com_port = not any([ser[port].inWaiting() for port in ports] + [ports == com_ports()])
+     if new_com_port:
+         print("New COM Port - Restart script")
+         os.execv(sys.executable,["python3"] + [sys.argv[0]])
+     
+except Exception:
+ print("Error found - Restart script")
+ os.execv(sys.executable,["python3"] + [sys.argv[0]])
