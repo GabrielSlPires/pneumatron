@@ -65,14 +65,15 @@ open_pneumatron_db <- function(file_name) {
       if (open) {
         message("try V4")
         data <- data.table::fread(file_name,
-                                  select = 1:10,
+                                  select = 1:11,
                                   col.names = c("id",
                                                 "group",
                                                 "seq",
                                                 "measure",
                                                 "log_line",
-                                                "temp1",
+                                                "humid",
                                                 "pressure",
+                                                "temp1",
                                                 "volt",
                                                 "version",
                                                 "datetime")) 
@@ -177,7 +178,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
       dplyr::group_by(id,
                       measure,
                       group,
-                      version)
+                      version) 
    }, error = function(e) {
      data <- pneumatron_data %>% 
       dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
