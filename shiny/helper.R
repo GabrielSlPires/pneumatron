@@ -1,4 +1,11 @@
 get_pneumatron_ad <- function(file_name) {
+
+    data <- open_pneumatron_db(file_name)
+
+    return(pneumatron_air_discharge(data))
+}
+
+open_pneumatron_db <- function(file_name) {
     open <- TRUE
     
     #Pneumatron V2
@@ -27,7 +34,7 @@ get_pneumatron_ad <- function(file_name) {
       open <- FALSE
       message("data opened")
     }, silent = FALSE)
-
+    
     #Pneumatron V3
     try({
       if (open) {
