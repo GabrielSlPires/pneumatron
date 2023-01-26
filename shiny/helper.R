@@ -171,18 +171,18 @@ pneumatron_air_discharge <- function(pneumatron_data,
   Vr = reservoir*10^-6
   #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 
   
+  data <- pneumatron_data %>%
+    dplyr::filter(between(log_line, pi_s*2, pf_s*2),
+                  !is.na(id)) 
+
   data <- tryCatch({ #separete measures and plants
-    data <- pneumatron_data %>% 
-      dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
-                    !is.na(id)) %>% 
+    data <- data %>% 
       dplyr::group_by(id,
                       measure,
                       group,
                       version) 
    }, error = function(e) {
-     data <- pneumatron_data %>% 
-      dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
-                    !is.na(id)) %>% 
+     data <- data %>% 
       dplyr::group_by(id,
                       measure,
                       datetime_group = lubridate::floor_date(datetime,
@@ -191,16 +191,16 @@ pneumatron_air_discharge <- function(pneumatron_data,
    })
    
    data <- data %>% 
-    dplyr::filter(n() == 2) %>% 
-    dplyr::summarise(pf = pressure[which(log_line == pf_s*2)], #final pressure
-                     pi = pressure[which(log_line == pi_s*2)], #initial pressure
-                     #using abs(), due to devices with relative and absotute pressures
-                     ad_mol = (abs(pf - pi)*100*Vr)/(R*temp), 
+    dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
+                     r_squared = summary(lm(pressure ~ log_line))$r.squared,
+                     pressure_diff = slope*(pf_s*2 - pi_s*2),
+                     ad_mol = (pressure_diff*100*Vr)/(R*temp), 
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
-                     c = (abs(pf - pi))/(R*temp),
+                     c = (pressure_diff)/(R*temp),
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                     datetime = datetime[which(log_line == pi_s*2)],
                      .groups = "drop") %>% 
+    dplyr::filter(r_squared >= 0.9) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
