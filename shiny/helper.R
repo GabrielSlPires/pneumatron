@@ -169,14 +169,27 @@ pneumatron_air_discharge <- function(pneumatron_data,
   
   Vr = reservoir*10^-6
   #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 
-  data <- pneumatron_data %>% 
-    dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
-                  !is.na(id)) %>% 
-    dplyr::group_by(id,
-                    measure,
-                    datetime_group = lubridate::floor_date(datetime,
-                                                     unit = "hour")
-                    ) %>% #separete measures and plants
+  
+  data <- tryCatch({ #separete measures and plants
+    data <- pneumatron_data %>% 
+      dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
+                    !is.na(id)) %>% 
+      dplyr::group_by(id,
+                      measure,
+                      group,
+                      version)
+   }, error = function(e) {
+     data <- pneumatron_data %>% 
+      dplyr::filter(log_line %in% c(pi_s*2, pf_s*2),
+                    !is.na(id)) %>% 
+      dplyr::group_by(id,
+                      measure,
+                      datetime_group = lubridate::floor_date(datetime,
+                                                       unit = "hour")
+                      )
+   })
+   
+   data <- data %>% 
     dplyr::filter(n() == 2) %>% 
     dplyr::summarise(pf = pressure[which(log_line == pf_s*2)], #final pressure
                      pi = pressure[which(log_line == pi_s*2)], #initial pressure
@@ -190,7 +203,6 @@ pneumatron_air_discharge <- function(pneumatron_data,
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
-  
   return(data)
 }
 
