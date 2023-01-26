@@ -4,6 +4,9 @@ import time
 import os
 import sys
 
+#database = "pneumatron_database"
+database = "leak_test2"
+
 def com_ports():
     ports_name = serial.tools.list_ports.comports()
     ports = []
@@ -14,6 +17,7 @@ def com_ports():
     return(ports)
 
 ports = com_ports()
+print(f"Reading ports: {ports}")
 ser = {port: serial.Serial(port, 115200, timeout=0.01) for port in ports}
 
 try:
@@ -23,11 +27,12 @@ try:
          if len(message) > 2:
              measure = message.decode()
              if measure.count(",") == 4:
-                 file = "pneumatron_database-V2"
+                 file = f"{database}-V2"
              if measure.count(",") == 11:
-                 file = "pneumatron_database-V3"
+                 file = f"{database}-V3"
              now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
              try:
+              file = f"{database}-V4"
               with open(f'data/raw_pneumatron/{file}.csv', 'a') as f:
                   del file
                   line = f'{measure[:-1]},{now}\n'
