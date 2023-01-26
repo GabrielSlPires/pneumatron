@@ -191,6 +191,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
    })
    
    data <- data %>% 
+   dplyr::filter(n() <= 120) %>% 
     dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
                      r_squared = summary(lm(pressure ~ log_line))$r.squared,
                      pressure_diff = slope*(pf_s*2 - pi_s*2),
