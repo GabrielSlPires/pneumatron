@@ -60,6 +60,27 @@ open_pneumatron_db <- function(file_name) {
       }
     }, silent = TRUE)
 
+    #Pneumatron V4
+    try({
+      if (open) {
+        message("try V4")
+        data <- data.table::fread(file_name,
+                                  select = 1:10,
+                                  col.names = c("id",
+                                                "group",
+                                                "seq",
+                                                "measure",
+                                                "log_line",
+                                                "temp1",
+                                                "pressure",
+                                                "volt",
+                                                "version",
+                                                "datetime")) 
+        open <- FALSE
+        message("data opened")
+      }
+    }, silent = TRUE)
+    
     #Pneumatron V2 - update
     try({
       if (open) {
@@ -111,8 +132,8 @@ open_pneumatron_db <- function(file_name) {
         message("data opened")
       }
     }, silent = TRUE)
-
-    return(pneumatron_air_discharge(data))
+    
+    return(data)
 }
 
 try.nls <- function(work.table,
