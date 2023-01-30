@@ -173,6 +173,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
   
   data <- pneumatron_data %>%
     dplyr::filter(between(log_line, pi_s*2, pf_s*2),
+                  pressure != "NaN",
                   !is.na(id)) 
 
   data <- tryCatch({ #separete measures and plants
