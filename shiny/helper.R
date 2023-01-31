@@ -155,7 +155,11 @@ try.nls <- function(work.table,
 }
 
 initial_pressure <- function(log_line, pressure) {
-  max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
+  tryCatch({
+    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
+  },
+  error = function(e) init <- 3,
+  warning = function(w) init <- 3)
 }
 
 pneumatron_air_discharge <- function(pneumatron_data,
