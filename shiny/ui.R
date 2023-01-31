@@ -1,5 +1,6 @@
-library(shiny)
-library(shinydashboard)
+suppressPackageStartupMessages(library(shiny))
+suppressPackageStartupMessages(library(shinydashboard))
+
 
 sidebar <- dashboardSidebar(
   sidebarMenu(

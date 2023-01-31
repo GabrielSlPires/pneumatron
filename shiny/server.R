@@ -1,13 +1,11 @@
 options(shiny.maxRequestSize = 300*1024^2)
 
-try({
-  library(shiny, quietly = TRUE)
-  library(lubridate, quietly = TRUE)
-  library(ggplot2, quietly = TRUE)
-  library(dplyr, quietly = TRUE)
-  library(plotly, quietly = TRUE)
-  library(gridExtra, quietly = TRUE)
-}, silent = TRUE)
+suppressPackageStartupMessages(library(shiny))
+suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(gridExtra))
 
 source("helper.R", local = TRUE)
 
