@@ -10,7 +10,6 @@ open_pneumatron_db <- function(file_name) {
     
     #Pneumatron V2
     try({
-      message("try V2")
       data <- data.table::fread(file_name,
                                 select = 1:18,
                                 col.names = c("id",
@@ -32,13 +31,12 @@ open_pneumatron_db <- function(file_name) {
                                               "light",
                                               "datetime"))
       open <- FALSE
-      message("data opened")
-    }, silent = FALSE)
+      message("data opened - v2")
+    }, silent = TRUE)
     
     #Pneumatron V3
     try({
       if (open) {
-        message("try V3")
         data <- data.table::fread(file_name,
                                   select = 1:13,
                                   col.names = c("id",
@@ -56,14 +54,13 @@ open_pneumatron_db <- function(file_name) {
                                                 "datetime")) 
         data$pressure = data$pressure/10
         open <- FALSE
-        message("data opened")
+        message("data opened - v3")
       }
     }, silent = TRUE)
 
     #Pneumatron V4
     try({
       if (open) {
-        message("try V4")
         data <- data.table::fread(file_name,
                                   select = 1:11,
                                   col.names = c("id",
@@ -78,14 +75,13 @@ open_pneumatron_db <- function(file_name) {
                                                 "version",
                                                 "datetime")) 
         open <- FALSE
-        message("data opened")
+        message("data opened - v4")
       }
     }, silent = TRUE)
     
     #Pneumatron V2 - update
     try({
       if (open) {
-        message("try V2 - update")
         data <- data.table::fread(file_name,
                                   select = 1:6,
                                   col.names = c("id",
@@ -95,7 +91,7 @@ open_pneumatron_db <- function(file_name) {
                                                 "pressure",
                                                 "datetime")) 
         open <- FALSE
-        message("data opened")
+        message("data opened - v2 - update")
       }
     }, silent = TRUE)
 
@@ -103,7 +99,6 @@ open_pneumatron_db <- function(file_name) {
     #Pneumatron V3 if read with old script
     try({
       if (open) {
-        message("try v3 old")
         data <- data.table::fread(file_name,
                                   header = FALSE) 
 
@@ -130,7 +125,7 @@ open_pneumatron_db <- function(file_name) {
         data <- dplyr::filter(data, !is.na(datetime))
 
         open <- FALSE
-        message("data opened")
+        message("data opened - v3 old")
       }
     }, silent = TRUE)
     
