@@ -4,6 +4,10 @@ suppressPackageStartupMessages(library(shinydashboard))
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
+    menuItem("Database",
+             tabName = "databases",
+             icon = icon("database") #filter-list
+    ),
     menuItem("Running Experiments",
              tabName = "running_view",
              icon = icon("filter") #filter-list
@@ -34,37 +38,40 @@ body <- dashboardBody(
   tags$head(tags$script(src = "message-handler.js")),
     tabItems(
         tabItem(
-            tabName = "running_view",
-            fluidRow(
-              h3("Running Experiment")
-            ),
-            fluidRow(
-              box(
-                title = "Database",
-                collapsible = TRUE,
-                status = "primary",
-                width = 12,
-                column(
-                  width = 6,
-                  fileInput(
-                    "file_database",
-                    "Select a file to change your database",
-                    accept = c(
-                      "text/csv",
-                      "text/comma-separated-values,text/plain",
-                      ".csv"),
-                    width = "100%"
-                  )
-                ),
-                column(
-                  width = 6,
-                  actionButton("btn_refreash_data", "Refreash Data"),
+          tabName = "databases",
+          fluidRow(
+            box(
+              title = "Database",
+              collapsible = TRUE,
+              status = "primary",
+              width = 12,
+              column(
+                width = 6,
+                fileInput(
+                  "file_database",
+                  "Select a file to change your database",
+                  accept = c(
+                    "text/csv",
+                    "text/comma-separated-values,text/plain",
+                    ".csv"),
+                  width = "100%"
                 )
+              ),
+              column(
+                width = 6,
+                actionButton("btn_refreash_data", "Refreash Data"),
               )
-            ),
-            fluidRow(
-                uiOutput("pneumatron_plots")
             )
+          ),
+        ),
+        tabItem(
+          tabName = "running_view",
+          fluidRow(
+            h3("Running Experiment")
+          ),
+          fluidRow(
+              uiOutput("pneumatron_plots")
+          )
         ),
         tabItem(
           tabName = "analysis_filter_view",
