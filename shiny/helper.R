@@ -154,6 +154,10 @@ try.nls <- function(work.table,
   return(fit) #returns nls fit. If fit was not sucesfull returns NA
 }
 
+initial_pressure <- function(log_line, pressure) {
+  max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
+}
+
 pneumatron_air_discharge <- function(pneumatron_data,
                                      pi_s = 1.5, #initial pressure time
                                      pf_s = 15, #final pressure time
@@ -167,7 +171,9 @@ pneumatron_air_discharge <- function(pneumatron_data,
   #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 
   
   data <- pneumatron_data %>%
-    dplyr::filter(between(log_line, pi_s*2, pf_s*2),
+    dplyr::filter(between(log_line,
+                          initial_pressure(log_line, pressure) + 1,
+                          initial_pressure(log_line, pressure) + pf_s*2),
                   pressure != "NaN",
                   !is.na(id)) 
 
