@@ -314,20 +314,6 @@ server <- function(input, output, session) {
       ),
       fluidRow(
         column(
-          width = 3,
-          HTML("The Water Pressure table needs to have two columns, <b>time</b> (dd.mm.yyyy hh:mm) and <b>pot</b> (MPa).<br>"),
-          br(),
-          fileInput(
-            "psi_file_input",
-            "Select your file with Water Pressure values:",
-            accept = c(
-              "text/csv",
-              "text/comma-separated-values,text/plain",
-              ".csv")
-          ),
-          tableOutput('psi_file_table')
-        ),
-        column(
           width = 9,
           plotlyOutput("psi_plot_filter_view")
         )
