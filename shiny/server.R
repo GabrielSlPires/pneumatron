@@ -1,11 +1,11 @@
-options(shiny.maxRequestSize=300*1024^2)
+options(shiny.maxRequestSize = 300*1024^2)
 
-library(shiny)
-library(lubridate)
-library(ggplot2)
-library(dplyr)
-library(plotly)
-library(gridExtra)
+library(shiny, quietly = TRUE)
+library(lubridate, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+library(plotly, quietly = TRUE)
+library(gridExtra, quietly = TRUE)
 
 source("helper.R", local = TRUE)
 
