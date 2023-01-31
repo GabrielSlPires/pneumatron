@@ -89,7 +89,9 @@ open_pneumatron_db <- function(file_name) {
                                                 "measure",
                                                 "log_line",
                                                 "pressure",
-                                                "datetime")) 
+                                                "datetime"))
+        #relative pressure to absolute pressure
+        data$pressure <- 101.325 - data$pressure
         open <- FALSE
         message("data opened - v2 - update")
       }
