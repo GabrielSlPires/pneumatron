@@ -70,10 +70,21 @@ server <- function(input, output, session) {
 
   output$psi_plot_filter_view <- renderPlotly({
       req(input$psi_file_input)
-      p <- ggplot(data_psi(),
+      p <- ggplot(dplyr::filter(data_psi(), id == input$pneumatron_id),
       aes(time, pot, group = 1)) +
         geom_line() +
         theme_bw()
+      ggplotly(p)
+  })
+
+  output$psi_plot_databases_view <- renderPlotly({
+      req(input$psi_file_input)
+      p <- ggplot(data_psi(),
+      aes(time, pot, group = factor(id), color = factor(id))) +
+        geom_line() +
+        theme_bw() +
+        scale_color_brewer(name = "Pneumatron",
+                           palette = "Set1")
       ggplotly(p)
   })
 
@@ -103,7 +114,7 @@ server <- function(input, output, session) {
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if(!is.null(input$psi_file_input)){
-      psi <- data_psi()
+      psi <- dplyr::filter(data_psi(), id == input$pneumatron_id)
       psi$time <- dmy_hm(psi$time)
       data <- extrapolated_wp(data, psi)
     }
