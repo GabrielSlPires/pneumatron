@@ -298,15 +298,20 @@ server <- function(input, output, session) {
   })
 
   observe({
-    input$pneumatron_id
-    date_min = min(data_ad()$datetime)
-    date_max = max(data_ad()$datetime)
-    updateSliderInput(session,
-                      inputId = "filter_experiment_datetime",
-                      min = date_min,
-                      max = date_max,
-                      value = c(date_min,
-                                date_max)
-                      )
+    if (input$pneumatron_id != 0) {
+      data <- data_ad() %>% 
+        dplyr::filter(id == input$pneumatron_id) %>%
+        dplyr::select(datetime) %>% 
+        unique()
+      date_min = min(data$datetime)
+      date_max = max(data$datetime)
+      updateSliderInput(session,
+                        inputId = "filter_experiment_datetime",
+                        min = date_min,
+                        max = date_max,
+                        value = c(date_min,
+                                  date_max)
+                        )
+    }
   })
  }
