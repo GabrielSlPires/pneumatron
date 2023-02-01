@@ -97,7 +97,8 @@ server <- function(input, output, session) {
     req(input$psi_file_input)
     tryCatch(
       {
-        df <- data.table::fread(input$psi_file_input$datapath)
+        df <- na.omit(data.table::fread(input$psi_file_input$datapath, fill=TRUE))
+        df$time <- lubridate::dmy_hm(df$time)
       },
       error = function(e) {
         stop(safeError(e))
