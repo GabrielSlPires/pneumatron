@@ -116,7 +116,6 @@ server <- function(input, output, session) {
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if(!is.null(input$psi_file_input)){
       psi <- dplyr::filter(data_psi(), id == input$pneumatron_id)
-      psi$time <- dmy_hm(psi$time)
       data <- extrapolated_wp(data, psi)
     }
     return(data)
