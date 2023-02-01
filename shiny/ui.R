@@ -1,5 +1,6 @@
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
+suppressPackageStartupMessages(library(plotly))
 
 
 sidebar <- dashboardSidebar(
