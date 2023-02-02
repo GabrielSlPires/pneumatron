@@ -51,19 +51,31 @@ server <- function(input, output, session) {
       plotname <- paste0("pneumatron_plot_p", my_i)
       output[[plotname]] <- renderPlotly({
         datetime_filter <- input[[paste0("date_range_running_p", my_i)]]
+        psi_point <- list()
+        try({
+          req(data_psi())
+          psi <- dplyr::filter(data_psi(),
+                               id == my_i)
+          psi_point <- list(
+            geom_vline(data = psi,
+                       aes(xintercept = as.numeric(time)),
+                       alpha = 0.5)
+          )
+        }, silent = TRUE)
+
         p <- ggplot(data_ad() %>%
-                 mutate(date = lubridate::date(datetime)) %>%
                  filter(
                   id == my_i,
-                  date >= datetime_filter[1],
-                  date <= datetime_filter[2]
+                  datetime >= datetime_filter[1],
+                  datetime <= datetime_filter[2]
                  ),
                aes(datetime, ad_ul)) +
           geom_point() +
+          psi_point +
           scale_x_datetime(date_labels = "%b %d") +
           ylab("Air Discharge (ul)") +
           theme_bw()
-          ggplotly(p)
+        ggplotly(p)
       })
     })
   }
