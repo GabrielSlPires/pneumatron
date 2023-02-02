@@ -12,11 +12,23 @@ source("helper.R", local = TRUE)
 #file_name <- "2022_08_01"
 
 server <- function(input, output, session) {
-  #import data when press the button
+
+  #import pneumatron database ----------------------------------------------------
+  output$open_data_ad <- renderText("Waiting for Pneumatron Database upload.")
+
   data_ad <- reactive({
     req(input$file_database)
     input$btn_refreash_data
-    get_pneumatron_ad(input$file_database$datapath)
+
+    data <- tryCatch({
+      data <- get_pneumatron_ad(input$file_database$datapath)
+      output$open_data_ad <- renderText("Pneumatron Database is ready!")
+      return(data)
+
+    }, error = function(e) {
+      output$open_data_ad <- renderText("Failed to open Pneumatron Database")
+      req(FALSE)
+    })
   })
 
   #create plots (running experiments) for each different device in ui

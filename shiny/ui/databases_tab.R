@@ -7,15 +7,20 @@ databases_tab <- tabItem(
       status = "primary",
       width = 12,
       column(
-      width = 12,
-      fileInput(
-        "file_database",
-        "Select a file to change your database",
-        accept = c(
-        "text/csv",
-        "text/comma-separated-values,text/plain",
-        ".csv"),
-        width = "100%")
+        width = 12,
+        fluidRow(
+          fileInput(
+            "file_database",
+            "Select a file to change your database",
+            accept = c(
+            "text/csv",
+            "text/comma-separated-values,text/plain",
+            ".csv"),
+            width = "100%")
+        ),
+        fluidRow(
+          verbatimTextOutput("open_data_ad")
+        )
       )
     )
   ),

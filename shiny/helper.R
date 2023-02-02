@@ -1,8 +1,8 @@
 get_pneumatron_ad <- function(file_name) {
-
     data <- open_pneumatron_db(file_name)
+    data <- pneumatron_air_discharge(data)
 
-    return(pneumatron_air_discharge(data))
+    return(data)
 }
 
 open_pneumatron_db <- function(file_name) {
@@ -101,36 +101,41 @@ open_pneumatron_db <- function(file_name) {
     #Pneumatron V3 if read with old script
     try({
       if (open) {
-        data <- data.table::fread(file_name,
-                                  header = FALSE) 
-
-        data <- data.frame(
-          reshape2::colsplit(string = data$V1,
-                             pattern = ",",
-                             names = c("id",
-                                       "ms",
-                                       "temp1",
-                                       "pressure",
-                                       "humid1",
-                                       "temp2",
-                                       "atm_pres2",
-                                       "humid2",
-                                       "seq",
-                                       "measure",
-                                       "log_line",
-                                       "voltage"
-                             )
-          ),
-          datetime = lubridate::ymd_hm(data$V2))
-        data$voltage = as.numeric(gsub("\n", "", data$voltage))
-
-        data <- dplyr::filter(data, !is.na(datetime))
-
-        open <- FALSE
-        message("data opened - v3 old")
+        bkp <- data
+        data <- tryCatch({
+          data <- data.table::fread(file_name,
+                                  header = FALSE)
+          data <- data.frame(
+            reshape2::colsplit(string = data$V1,
+                               pattern = ",",
+                               names = c("id",
+                                         "ms",
+                                         "temp1",
+                                         "pressure",
+                                         "humid1",
+                                         "temp2",
+                                         "atm_pres2",
+                                         "humid2",
+                                         "seq",
+                                         "measure",
+                                         "log_line",
+                                         "voltage"
+                               )
+            ),
+            datetime = lubridate::ymd_hm(data$V2))
+          data$voltage = as.numeric(gsub("\n", "", data$voltage))
+          data <- dplyr::filter(data, !is.na(datetime))
+          open <- FALSE
+          message("data opened - v3 old")
+        }, warning = function(w) {
+          data <- bkp
+          return(data)
+          stop()
+        })
       }
     }, silent = TRUE)
     
+    if (!is.data.frame(data)) stop("Failed to open Pneumatron database")
     return(data)
 }
 
