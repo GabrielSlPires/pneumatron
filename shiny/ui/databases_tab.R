@@ -41,6 +41,7 @@ databases_tab <- tabItem(
           "text/csv",
           "text/comma-separated-values,text/plain",
           ".csv")), #accept excel
+        verbatimTextOutput("open_data_psi"),
         tableOutput('psi_file_table')
       ),
       column(

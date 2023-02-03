@@ -79,7 +79,7 @@ server <- function(input, output, session) {
                  filter(
                   id == my_i,
                   datetime >= datetime_filter[1],
-                  datetime <= datetime_filter[2]
+                  datetime <= datetime_filter[2] + 1
                  ),
                aes(datetime, ad_ul)) +
           geom_point() +
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
   }
 
   output$psi_plot_filter_view <- renderPlotly({
-      req(input$psi_file_input)
+      req(data_psi())
       p <- ggplot(dplyr::filter(data_psi(), id == input$pneumatron_id),
       aes(time, pot, group = 1)) +
         geom_line() +
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
   })
 
   output$psi_plot_databases_view <- renderPlotly({
-      req(input$psi_file_input)
+      req(data_psi())
       p <- ggplot(data_psi(),
       aes(time, pot, group = factor(id), color = factor(id))) +
         geom_line() +
@@ -113,22 +113,32 @@ server <- function(input, output, session) {
   })
 
   #render data_psi in page
-  output$psi_file_table <- renderTable({data_psi()})
+  output$psi_file_table <- renderTable({
+    req(data_psi())
+    df <- data_psi()
+    df$time <- as.character(df$time)
+    return(df)
+  })
 
   #read data_psi file
+  output$open_data_psi <- renderText("Waiting for table upload.")
   data_psi <- reactive({
     #read only if file is uploaded
     req(input$psi_file_input)
-    tryCatch(
+    df <- tryCatch(
       {
+        if(!validate_data_psi(input$psi_file_input$datapath)) stop()
         df <- na.omit(data.table::fread(input$psi_file_input$datapath, fill=TRUE))
         df$time <- lubridate::dmy_hm(df$time)
+
+        output$open_data_psi <- renderText("Table is ready!")
+        return(df)
       },
       error = function(e) {
-        stop(safeError(e))
+        output$open_data_psi <- renderText("Failed to open.")
+        req(FALSE)
       }
     )
-    return(df)
   })
 
   data_ad_experiment_filter <- reactive({

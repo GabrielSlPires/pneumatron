@@ -275,3 +275,10 @@ extrapolated_wp <- function(pneumatron, #pneumatron data file
   
   return(pneumatron)
 }
+
+validate_data_psi <-function(file) {
+  df <- data.table::fread(file, nrows = 2)
+  validation <- any(colnames(df) %in% c("id", "time", "pot")) #check col names
+
+  return(validation)
+}
