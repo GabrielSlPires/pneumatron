@@ -115,7 +115,7 @@ server <- function(input, output, session) {
   #render data_psi in page
   output$psi_file_table <- renderTable({
     req(data_psi())
-    df <- data_psi()
+    df <- dplyr::arrange(data_psi(), id, time)
     df$time <- as.character(df$time)
     return(df)
   })
@@ -128,8 +128,9 @@ server <- function(input, output, session) {
     df <- tryCatch(
       {
         if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-        df <- na.omit(data.table::fread(input$psi_file_input$datapath, fill=TRUE))
+        df <- data.table::fread(input$psi_file_input$datapath, fill=TRUE)
         df$time <- lubridate::dmy_hm(df$time)
+        df <- dplyr::filter(df, !is.na(id))
 
         output$open_data_psi <- renderText("Table is ready!")
         return(df)
@@ -149,7 +150,7 @@ server <- function(input, output, session) {
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if(!is.null(input$psi_file_input)){
-      psi <- dplyr::filter(data_psi(), id == input$pneumatron_id)
+      psi <- dplyr::filter(data_psi(), id == input$pneumatron_id, !is.na(pot))
       data <- extrapolated_wp(data, psi)
     }
     return(data)
