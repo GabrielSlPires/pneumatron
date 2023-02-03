@@ -5,17 +5,22 @@ databases_tab <- tabItem(
     box(
       title = "Pneumatron",
       status = "primary",
-      width = 12,
+      width = 4,
       fluidRow(
         column(
-          width = 2,
+          width = 12,
+          align="center",
           shinyFilesButton('file_database',
                            label = 'File select',
                            title = 'Select a file to change your database',
                            multiple = FALSE)
-        ),
+        )
+      ),
+      fluidRow(
         column(
-          width = 10,
+          width = 12,
+          align="center",
+          HTML("<br>"),
           uiOutput("open_data_ad")
         )
       )

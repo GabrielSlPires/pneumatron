@@ -48,10 +48,11 @@ body <- dashboardBody(
         tabItem(
           tabName = "running_view",
           fluidRow(
-            h3("Running Experiment"),
             column(
-              width = 6,
-              actionButton("btn_refreash_data", "Refreash Data"),
+              width = 12,
+              align = "center",
+              h3("Running Experiment"),
+              HTML("<br>")
             )
           ),
           fluidRow(
