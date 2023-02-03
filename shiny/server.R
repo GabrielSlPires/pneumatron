@@ -6,6 +6,7 @@ suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(plotly))
 suppressPackageStartupMessages(library(gridExtra))
+suppressPackageStartupMessages(library(shinyFiles))
 
 source("helper.R", local = TRUE)
 
@@ -14,19 +15,28 @@ source("helper.R", local = TRUE)
 server <- function(input, output, session) {
 
   #import pneumatron database ----------------------------------------------------
-  output$open_data_ad <- renderText("Waiting for Pneumatron Database upload.")
+  output$open_data_ad <- renderUI(HTML("Waiting for Pneumatron Database upload."))
+
+  shinyFileChoose(input, 'file_database', root=c(root='../data'), session=session)
 
   data_ad <- reactive({
     req(input$file_database)
-    input$btn_refreash_data
+    if (!is.null(input$file_database)) {
+      file_selected <- parseFilePaths(root=c(root='../data'), input$file_database)
+      file_path <- as.character(file_selected$datapath)
+      }
+
+    req(file_path)
+    output$open_data_ad <- renderUI(HTML("Loading..."))
 
     data <- tryCatch({
-      data <- get_pneumatron_ad(input$file_database$datapath)
-      output$open_data_ad <- renderText("Pneumatron Database is ready!")
+      invalidateLater(900000, session)
+      data <- get_pneumatron_ad(file_path)
+      output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
       return(data)
 
     }, error = function(e) {
-      output$open_data_ad <- renderText("Failed to open Pneumatron Database")
+      output$open_data_ad <- renderUI(HTML("Failed to open Pneumatron Database"))
       req(FALSE)
     })
   })

@@ -6,20 +6,17 @@ databases_tab <- tabItem(
       title = "Pneumatron",
       status = "primary",
       width = 12,
-      column(
-        width = 12,
-        fluidRow(
-          fileInput(
-            "file_database",
-            "Select a file to change your database",
-            accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv"),
-            width = "100%")
+      fluidRow(
+        column(
+          width = 2,
+          shinyFilesButton('file_database',
+                           label = 'File select',
+                           title = 'Select a file to change your database',
+                           multiple = FALSE)
         ),
-        fluidRow(
-          verbatimTextOutput("open_data_ad")
+        column(
+          width = 10,
+          uiOutput("open_data_ad")
         )
       )
     )

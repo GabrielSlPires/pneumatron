@@ -1,6 +1,7 @@
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(shinydashboard))
 suppressPackageStartupMessages(library(plotly))
+suppressPackageStartupMessages(library(shinyFiles))
 
 sapply(list.files("ui/",
                   pattern = "*.R",
