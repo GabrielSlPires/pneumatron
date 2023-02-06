@@ -12,12 +12,19 @@ def com_ports():
 
     for port, desc, hwid in sorted(ports_name):
         ports.append(port)
-
+    
+    #ports.remove('COM4')
     return(ports)
 
 ports = com_ports()
 print(f"\nReading ports: {ports}\n")
 ser = {port: serial.Serial(port, 115200, timeout=0.01) for port in ports}
+
+for port in ports:
+    ser[port].setRTS(False)
+    ser[port].setDTR(False)
+    time.sleep(0.5)
+    ser[port].reset_input_buffer()
 
 try:
  while True:
