@@ -190,6 +190,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
       dplyr::group_by(id,
                       measure,
                       group,
+                      lubridate::day(datetime),
                       version) 
    }, error = function(e) {
      data <- data %>% 
@@ -213,7 +214,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
                      c = (pressure_diff)/(R*temp),
                      n_mol = (p_atm*1000*Vr)/(R*temp),
-                    datetime = datetime[which(log_line == min(log_line))],
+                     datetime = min(datetime),
                      .groups = "drop") %>% 
     dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
     dplyr::group_by(id) %>% 
