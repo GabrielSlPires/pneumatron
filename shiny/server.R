@@ -268,7 +268,7 @@ server <- function(input, output, session) {
                    paste("water pressure file:", input$psi_file_input$name)), fileConn)
       close(fileConn) 
       session$sendCustomMessage(type = 'testmessage',
-        message = 'Your experiment data is saved! Please, check "fig" and "result" folders')
+        message = 'Your experiment data is saved! Please, check fig and result folders')
     }
   })
 
