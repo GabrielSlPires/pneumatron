@@ -214,6 +214,13 @@ server <- function(input, output, session) {
 
     p
   })
+
+  output$pneumatron_filter_psi_ad_ul <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
+  })
   output$pneumatron_plot_psi_ad_ul <- renderPlot(plot_psi_ad_ul())
   plot_psi_ad_ul <- reactive({
     p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
@@ -223,6 +230,13 @@ server <- function(input, output, session) {
       xlab(expression(paste(psi, " (MPa)"))) +
       ylab(expression(paste("Air Discharge (", mu, "l)")))
     p
+  })
+
+  output$pneumatron_filter_time_psi <- renderPlotly({
+    p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
+      geom_point() +
+      theme_bw()
+    ggplotly(p)
   })
   output$pneumatron_plot_time_psi <- renderPlot(plot_time_psi())
   plot_time_psi <- reactive({

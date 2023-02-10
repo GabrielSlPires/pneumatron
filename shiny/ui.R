@@ -113,12 +113,12 @@ body <- dashboardBody(
               column(
                 width = 6,
                 h3("Water Pressure"),
-                plotOutput("pneumatron_plot_time_psi")
+                plotlyOutput("pneumatron_filter_time_psi")
               ),
               column(
                 width = 6,
-                h3("Water Pressure <b>x</b> Air Discharged"),
-                plotOutput("pneumatron_plot_psi_ad_ul")
+                h3("Water Pressure x Air Discharged"),
+                plotlyOutput("pneumatron_filter_psi_ad_ul")
               )
             )
           )
