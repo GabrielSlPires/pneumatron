@@ -113,7 +113,7 @@ server <- function(input, output, session) {
 
   output$psi_plot_databases_view <- renderPlotly({
       req(data_psi())
-      p <- ggplot(data_psi(),
+      p <- ggplot(na.omit(data_psi()),
       aes(time, pot, group = factor(id), color = factor(id))) +
         geom_line() +
         theme_bw() +
