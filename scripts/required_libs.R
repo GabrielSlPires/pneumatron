@@ -10,6 +10,7 @@ packages <- c(
     "serial",
     "shiny",
     "shinydashboard",
+    "shinyFiles",
     "shinyTime"
 )
 
