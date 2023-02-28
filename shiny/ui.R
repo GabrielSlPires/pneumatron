@@ -33,7 +33,7 @@ sidebar <- dashboardSidebar(
     ),
     menuItem("About",
              icon = icon("th"),
-             tabName = "about_vire"
+             tabName = "about_view"
     )
   ),
   menuItem("Source code",
@@ -127,6 +127,12 @@ body <- dashboardBody(
           tabName = "analysis_plots_view",
           fluidRow(
             uiOutput("analysis_plots")
+          )
+        ),
+        tabItem(
+          tabName = "about_view",
+          fluidRow(
+            p("Version: 0.2.2")
           )
         )
     )
