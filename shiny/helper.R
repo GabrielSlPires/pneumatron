@@ -30,6 +30,8 @@ open_pneumatron_db <- function(file_name) {
                                               "co2_cozir",
                                               "light",
                                               "datetime"))
+      #relative pressure to absolute pressure
+      data$pressure <- 101.325 - data$pressure
       open <- FALSE
       message("data opened - v2")
     }, silent = TRUE)
