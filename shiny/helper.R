@@ -192,7 +192,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
       dplyr::group_by(id,
                       measure,
                       group,
-                      lubridate::day(datetime),
+                      day = lubridate::day(datetime),
                       version) 
    }, error = function(e) {
      data <- data %>% 
