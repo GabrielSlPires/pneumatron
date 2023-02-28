@@ -132,7 +132,7 @@ body <- dashboardBody(
         tabItem(
           tabName = "about_view",
           fluidRow(
-            p("Version: 0.2.2")
+            p("Version: 0.3 - Release: 28/02/2023")
           )
         )
     )
