@@ -173,9 +173,17 @@ server <- function(input, output, session) {
     ggplotly(p)
   })
 
-  #Analysis plots
+  #Vulnerability curve parameters
   p50_table <- reactive(pneumatron_p50(dplyr::select(data_ad_experiment_filter(), pad, psi)))
 
+  output$filter_view_p50_table <- renderTable({
+    req(p50_table())
+    df <- data.frame(variable = names(p50_table()),
+                     estimated = p50_table())
+    return(df)
+  })
+
+  #Analysis plots
   output$pneumatron_plot_psi_pad <- renderPlot(plot_psi_pad())
   plot_psi_pad <- reactive({
     #apply non linear fit
@@ -189,7 +197,7 @@ server <- function(input, output, session) {
       theme_bw() +
       ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
-      ylab("Air Discharge (%)") +
+      ylab("Air Discharge (%)") + #fazer annotation custom ficar opcional
       annotation_custom(tableGrob(p50_table(),
                               theme = ttheme_minimal()),
                     xmin = p50_table()["p12"], #transformar eixo x em pad para marcar a posiçao no canto inferifor esquerdo

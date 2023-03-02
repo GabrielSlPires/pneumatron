@@ -121,6 +121,17 @@ body <- dashboardBody(
                 plotlyOutput("pneumatron_filter_psi_ad_ul")
               )
             )
+          ),
+          fluidRow(
+            box(
+              title = "Vulnerability Curve Paramenters",
+              width = 6,
+              column(
+                width = 12,
+                h3("Parameters Table"),
+                tableOutput("filter_view_p50_table")
+              )
+            )
           )
         ),
         tabItem(
