@@ -178,8 +178,13 @@ server <- function(input, output, session) {
 
   output$filter_view_p50_table <- renderTable({
     req(p50_table())
+
     df <- data.frame(variable = names(p50_table()),
-                     estimated = p50_table())
+                     estimated = p50_table(),
+                     measured = c(NA,
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 12),
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 50),
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 88)))
     return(df)
   })
 

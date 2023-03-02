@@ -179,8 +179,16 @@ pneumatron_p50 <- function(data) {
                  "p12" = p12,
                  "p50" = p50,
                  "p88" = p88)
-                 
+
   return(p50_table)
+}
+
+pneumatron_px_proximity <- function(data, p) {
+  px = data %>% 
+    slice(which.min(abs(pad - p))) %>% 
+    select(psi) %>% 
+    as.numeric()
+  return(px)
 }
 
 initial_pressure <- function(log_line, pressure) {
