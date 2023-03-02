@@ -174,41 +174,26 @@ server <- function(input, output, session) {
   })
 
   #Analysis plots
+  p50_table <- reactive(pneumatron_p50(dplyr::select(data_ad_experiment_filter(), pad, psi)))
+
   output$pneumatron_plot_psi_pad <- renderPlot(plot_psi_pad())
   plot_psi_pad <- reactive({
     #apply non linear fit
-    fit.pad <- try.nls(work.table = data_ad_experiment_filter() %>%
-                         select(pad, psi),
-                       model = pad ~ 100/(1 + exp(a*(psi - p50))),
-                       start.values = data.frame(parameter = c("a","p50"),
-                                                 min = c(0,-10),
-                                                 max = c(5,0)))
-    
-    a.pad = summary(fit.pad)$coefficients[1]
-    p50.pad = summary(fit.pad)$coefficients[2]
-    p88.pad = log(12/88,exp(1))/a.pad + p50.pad
-    p12.pad = log(88/12,exp(1))/a.pad + p50.pad
-
-    p50_table <- cbind(variable = c("p12", "p50", "p88"),
-                      values = c(round(as.numeric(p12.pad), 2),
-                                  round(as.numeric(p50.pad), 2),
-                                  round(as.numeric(p88.pad), 2)))
-
 
     p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
       geom_point() +
-      stat_function(fun = function(x) 100/(1 + exp(a.pad*(x - p50.pad))),
+      stat_function(fun = function(x) 100/(1 + exp(p50_table()["a"]*(x - p50_table()["p50"]))),
                 color = "royalblue", 
                 size = 1) +
-      geom_vline(xintercept = p50.pad) + 
+      geom_vline(xintercept = p50_table()["p50"]) + 
       theme_bw() +
       ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
       ylab("Air Discharge (%)") +
-      annotation_custom(tableGrob(p50_table,
+      annotation_custom(tableGrob(p50_table(),
                               theme = ttheme_minimal()),
-                    xmin = p12.pad/2,
-                    xmax = p12.pad,
+                    xmin = p50_table()["p12"], #transformar eixo x em pad para marcar a posiçao no canto inferifor esquerdo
+                    xmax = p50_table()["p12"],
                     ymin = 75,
                     ymax = 100)
 

@@ -163,6 +163,26 @@ try.nls <- function(work.table,
   return(fit) #returns nls fit. If fit was not sucesfull returns NA
 }
 
+pneumatron_p50 <- function(data) {
+  fit.pad <- try.nls(work.table =  data,
+                     model = pad ~ 100/(1 + exp(a*(psi - p50))),
+                     start.values = data.frame(parameter = c("a","p50"),
+                                               min = c(0,-10),
+                                               max = c(5,0)))
+  
+  a = summary(fit.pad)$coefficients[1]
+  p50 = summary(fit.pad)$coefficients[2]
+  p88 = log(12/88,exp(1))/a + p50
+  p12 = log(88/12,exp(1))/a + p50
+
+  p50_table <- c("a" = a,
+                 "p12" = p12,
+                 "p50" = p50,
+                 "p88" = p88)
+                 
+  return(p50_table)
+}
+
 initial_pressure <- function(log_line, pressure) {
   tryCatch({
     init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
