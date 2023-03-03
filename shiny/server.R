@@ -284,67 +284,6 @@ server <- function(input, output, session) {
     }
   })
 
-  output$analysis_plots <- renderUI({
-    fluidRow(
-      column(
-        width = 12,
-        if(!is.null(input$psi_file_input)){
-          box(
-            width = 12,
-            fluidRow(
-              column(
-                width = 4,
-                textInput(
-                  "title_analysis_plots",
-                  "Graphic Title:"
-                )
-              ),
-              column(
-                width = 4,
-                textInput(
-                  "file_name_save",
-                  "File Name (Save):"
-                )
-              ),
-              column(
-                width = 4,
-                actionButton("btn_save_data", "Save"),
-              )
-            ),
-            fluidRow(
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_psi_pad")
-              ),
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_psi_ad_ul")
-              )
-            ),
-            fluidRow(
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_time_psi")
-              ),
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_time_ad_ul")
-              )
-            )
-          )
-          } else {
-            fluidRow(
-              column(
-                width = 12,
-                align = "center",
-                HTML("Water Pressure file is required, please attached it in <b>Analysis</b> -> <b>Filter Experiment</b> View!")
-              )
-            )
-          }
-      )
-    )
-  })
-
   # Filter Experiments View -------------------------------------------------------
   observe({
     data_ad()

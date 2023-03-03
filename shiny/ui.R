@@ -137,7 +137,59 @@ body <- dashboardBody(
         tabItem(
           tabName = "analysis_plots_view",
           fluidRow(
-            uiOutput("analysis_plots")
+            column(
+              width = 12,
+              align = "center",
+              HTML("<b>Pneumatron Database</b> and <b>Water Pressure</b> file are required for this view, please attached them in <b>Databases</b> View!")
+            )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              box(
+                width = 12,
+                fluidRow(
+                  column(
+                    width = 4,
+                    textInput(
+                      "title_analysis_plots",
+                      "Graphic Title:"
+                    )
+                  ),
+                  column(
+                    width = 4,
+                    textInput(
+                      "file_name_save",
+                      "File Name (Save):"
+                    )
+                  ),
+                  column(
+                    width = 4,
+                    actionButton("btn_save_data", "Save"),
+                  )
+                ),
+                fluidRow(
+                  column(
+                    width = 6,
+                    plotOutput("pneumatron_plot_psi_pad")
+                  ),
+                  column(
+                    width = 6,
+                    plotOutput("pneumatron_plot_psi_ad_ul")
+                  )
+                ),
+                fluidRow(
+                  column(
+                    width = 6,
+                    plotOutput("pneumatron_plot_time_psi")
+                  ),
+                  column(
+                    width = 6,
+                    plotOutput("pneumatron_plot_time_ad_ul")
+                  )
+                )
+              )
+            )
           )
         ),
         tabItem(
