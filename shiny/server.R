@@ -193,7 +193,25 @@ server <- function(input, output, session) {
   plot_psi_pad <- reactive({
     #apply non linear fit
 
-    p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
+    #dar opção de escrever posição da tabela
+    table_x_min <- data_ad_experiment_filter() %>% 
+      mutate(psi = psi*-1,
+             x_axis_norm = (psi - min(psi))/(max(psi) - min(psi))*100) %>%
+      slice(which.min(abs(x_axis_norm - input$p50_plot_x_axis_min))) %>%
+      mutate(psi = psi*-1) %>%
+      select(psi) %>% 
+      as.numeric()
+
+    table_x_max <- data_ad_experiment_filter() %>% 
+      mutate(psi = psi*-1,
+             x_axis_norm = (psi - min(psi))/(max(psi) - min(psi))*100) %>%
+      slice(which.min(abs(x_axis_norm - input$p50_plot_x_axis_max))) %>%
+      mutate(psi = psi*-1) %>%
+      select(psi) %>% 
+      as.numeric()
+
+    p <- ggplot(data_ad_experiment_filter(),
+                aes(psi, pad)) +
       geom_point() +
       stat_function(fun = function(x) 100/(1 + exp(p50_table()["a"]*(x - p50_table()["p50"]))),
                 color = "royalblue", 
@@ -202,13 +220,13 @@ server <- function(input, output, session) {
       theme_bw() +
       ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
-      ylab("Air Discharge (%)") + #fazer annotation custom ficar opcional
-      annotation_custom(tableGrob(p50_table(),
+      ylab("Air Discharge (%)") + 
+      annotation_custom(tableGrob(data.frame(estimated = round(p50_table(), 2)),
                               theme = ttheme_minimal()),
-                    xmin = p50_table()["p12"], #transformar eixo x em pad para marcar a posiçao no canto inferifor esquerdo
-                    xmax = p50_table()["p12"],
-                    ymin = 75,
-                    ymax = 100)
+                    xmin = table_x_min,
+                    xmax = table_x_max,
+                    ymin = input$p50_plot_y_axis_min,
+                    ymax = input$p50_plot_y_axis_max)
 
     p
   })

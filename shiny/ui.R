@@ -147,15 +147,79 @@ body <- dashboardBody(
             column(
               width = 12,
               box(
+                title = "Plot Customization",
+                width = 6,
+                column(
+                  width = 6,
+                  fluidRow(
+                    column(
+                      width = 12,
+                      align = "center",
+                      h4("P50 table position"),
+                    ),
+                    fluidRow(
+                      column(
+                        width = 6,
+                        align = "center",
+                        fluidRow(
+                          numericInput("p50_plot_x_axis_min",
+                                      label = ("X axis min (%)"), 
+                                      width = "80%",
+                                      min = 0,
+                                      max = 100,
+                                      value = 75,
+                                      step = 1.0)
+                        ),
+                        fluidRow(
+                          numericInput("p50_plot_x_axis_max",
+                                      label = ("X axis max (%)"), 
+                                      width = "80%",
+                                      min = 0,
+                                      max = 100,
+                                      value = 100,
+                                      step = 1.0)
+                        )
+                      ),
+                      column(
+                        width = 6,
+                        fluidRow(
+                          numericInput("p50_plot_y_axis_min",
+                                      label = ("Y axis min (%)"), 
+                                      width = "80%",
+                                      min = 0,
+                                      max = 100,
+                                      value = 0,
+                                      step = 1.0)
+                        ),
+                        fluidRow(
+                          numericInput("p50_plot_y_axis_max",
+                                      label = ("Y axis max (%)"), 
+                                      width = "80%",
+                                      min = 0,
+                                      max = 100,
+                                      value = 25,
+                                      step = 1.0)
+                        )
+                      )
+                    )
+                  )
+                ),
+                column(
+                  width = 6,
+                  textInput(
+                    "title_analysis_plots",
+                    "Graphic Title:"
+                  )
+                )
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              box(
                 width = 12,
                 fluidRow(
-                  column(
-                    width = 4,
-                    textInput(
-                      "title_analysis_plots",
-                      "Graphic Title:"
-                    )
-                  ),
                   column(
                     width = 4,
                     textInput(

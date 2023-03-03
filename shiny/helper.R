@@ -157,7 +157,8 @@ try.nls <- function(work.table,
     fit <- NA
     try(fit <- nls(model,
                    work.table,
-                   start = start)) #tries the nls model
+                   start = start),
+        silent = TRUE) #tries the nls model
     if (any(!is.na(fit))) break #if the model was suscesfully fit break out of the loop
   }
   return(fit) #returns nls fit. If fit was not sucesfull returns NA
