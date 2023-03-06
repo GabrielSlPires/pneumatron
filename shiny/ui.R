@@ -26,6 +26,10 @@ sidebar <- dashboardSidebar(
     menuItem("Analysis",
              menuSubItem("Filter Experiments",
                                  tabName = "analysis_filter_view"),
+             menuSubItem("Save Experiment",
+                                 tabName = "save_experiment_view"),
+             menuSubItem("Experiments",
+                                 tabName = "experiments_view"),
              menuSubItem("Plots",
                                  tabName = "analysis_plots_view"),
              tabName = "analysis_view",
@@ -134,6 +138,21 @@ body <- dashboardBody(
             )
           )
         ),
+
+        tabItem(
+          tabName = "save_experiment_view",
+          fluidRow(
+            column(
+              width = 12,
+              h2 = "Save Experiment"
+            )
+          ),
+          fluidRow(
+            tableOutput("experiment_data")
+          )
+        ),
+
+
         tabItem(
           tabName = "analysis_plots_view",
           fluidRow(
