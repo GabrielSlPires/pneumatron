@@ -273,6 +273,29 @@ server <- function(input, output, session) {
     p
   })
 
+  output$experiment_data <- renderTable({
+    df <- data.frame(
+      Parameter = c(
+        "Pneumatron ID:",
+        "Plant ID:",
+        "Initial Date:",
+        "End Date:",
+        "Database:",
+        "Water Measures:"
+        ),
+      Value =c(
+        input$pneumatron_id,
+        NA,
+        input$filter_experiment_datetime[1],
+        input$filter_experiment_datetime[2],
+        as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath),
+        input$psi_file_input$name
+        )
+    )
+    print(df)
+    return(df)
+  })
+
   observeEvent(input$btn_save_data, {
     if(input$file_name_save == ""){
       session$sendCustomMessage(type = 'testmessage',
