@@ -24,6 +24,14 @@ databases_tab <- tabItem(
           uiOutput("open_data_ad")
         )
       )
+    ),
+    box(
+      title = "Configuration",
+      status = "primary",
+      width = 4,
+      checkboxInput("database_auto_update",
+                    "Enable database auto-update",
+                    value = FALSE)
     )
   ),
 

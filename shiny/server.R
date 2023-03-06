@@ -30,7 +30,7 @@ server <- function(input, output, session) {
     output$open_data_ad <- renderUI(HTML("Loading..."))
 
     data <- tryCatch({
-      invalidateLater(900000, session)
+      if (input$database_auto_update) invalidateLater(900000, session)
       data <- get_pneumatron_ad(file_path)
       output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
       return(data)
