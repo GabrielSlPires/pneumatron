@@ -4,6 +4,21 @@
 
 file_name <- "data/IAC/data_iac/pneumatron_database-v4.csv"
 
+# exculir todas as linhas com [^ -:.,v0-9]
+
+#read all lines from file
+con <- file(file_name, "r", blocking = FALSE)
+data_to_correct <- readLines(con)
+close(con)
+
+non_allowed_characters <- stringr::str_detect(data_to_correct,
+                                              "[^ -:.,v0-9]",
+                                              negate = TRUE)
+#remove line with bug and rewrite file
+con <- file(file_name, "w")
+writeLines(data_to_correct[non_allowed_characters], con)
+close(con)
+
 
 if (length(file_name) == 0) stop("File name must be supplied (input file)", call. = FALSE)
 
@@ -47,4 +62,5 @@ rm(data,
    file_name,
    need_correction)
 
-message("\nAll lines with bugs were removed, database is ready for usage!")
+
+message("\nAll lines with bugs were removed, database is ready for usage!\n")
