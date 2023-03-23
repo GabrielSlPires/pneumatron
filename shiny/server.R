@@ -13,7 +13,7 @@ options(shiny.usecairo = TRUE)
 
 source("helper.R", local = TRUE)
 
-#file_name <- "2022_08_01"
+experiment_path <- "../data/experiments.csv"
 
 server <- function(input, output, session) {
 
@@ -416,4 +416,62 @@ server <- function(input, output, session) {
                         )
     }
   })
+
+  #---------- Manage Experiments
+  #https://stackoverflow.com/questions/57581690/combining-editable-dt-with-add-row-functionality
+  
+  experiments_table <- reactiveVal(data.table::fread(experiment_path))
+
+  observeEvent(input$table_manage_experiments_cell_edit, {
+    info <- input$table_manage_experiments_cell_edit
+    edit_row <-  info$row
+    edit_col <-  info$col + 1
+    edit_value <-  info$value
+
+    data = data.frame(experiments_table())
+    data[as.numeric(edit_row),
+         as.numeric(edit_col)] <- edit_value
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_add, {
+    new_line <- data.frame(id = NA,
+                           start_datetime = NA,
+                           final_datetime = NA,
+                           finished = FALSE,
+                           database = NA,
+                           water_potential = NA)
+    data <- rbind(experiments_table(), new_line)
+
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_delete, {
+    data = experiments_table()
+    if (!is.null(input$table_manage_experiments_rows_selected)) {
+      data <- data[-as.numeric(input$table_manage_experiments_rows_selected),]
+    }
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_var_add, {
+
+    req(!input$experiment_var_name %in% colnames(experiments_table()))
+    data <- data.frame(experiments_table())
+    data[input$experiment_var_name] <- NA
+
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_save, {
+    data.table::fwrite(experiments_table(), experiment_path)
+  })
+
+  output$table_manage_experiments <- DT::renderDT({
+    DT::datatable(experiments_table(),
+                  rownames = FALSE,
+                  editable = TRUE)
+  })
+
+  #----------
  }

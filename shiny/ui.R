@@ -34,6 +34,10 @@ sidebar <- dashboardSidebar(
              tabName = "analysis_view",
              icon = icon("chart-bar")
     ),
+    menuItem("Manage Experiments",
+             tabName = "exp_managment_view",
+             icon = icon("folder")
+    ),
     menuItem("About",
              icon = icon("th"),
              tabName = "about_view"
@@ -75,6 +79,75 @@ body <- dashboardBody(
               )
             )
           )
+        ),
+        tabItem(
+          tabName = "exp_managment_view",
+          fluidRow(
+            column(
+              width = 12,
+              box(
+                title = "Table Settings",
+                width = 12,
+                column(
+                  width = 3,
+                  align = "center",
+                  h4("Add New Experiment"),
+                  actionButton("experiment_add", "Add")
+                ),
+                column(
+                  width = 3,
+                  align = "center",
+                  h4("Delete Selected Experiment"),
+                  actionButton("experiment_delete", "Delete")
+                ),
+                column(
+                  width = 3,
+                  align = "center",
+                  fluidRow(
+                    h4("Add a new Variable (Column)"),
+                  ),
+                  fluidRow(
+                    column(
+                      width = 8,
+                      textInput("experiment_var_name", "Column Name"),
+                    ),
+                    column(
+                      width = 4,
+                      actionButton("experiment_var_add", "Add")
+                    ) #add select input to remove column
+                  )
+                ),
+                column(
+                  width = 3,
+                  align = "center",
+                  h4("Save Experiment Table"),
+                  actionButton("experiment_save", "Save")
+                ),
+              )
+            )
+          ), #end first row
+          fluidRow(
+            column(
+              width = 12,
+              box(
+                title = "Experiments",
+                width = 12,
+                #add some text explaning
+                #do something to allow only right format in columns - need to do it before data not atribuited
+                DT::DTOutput("table_manage_experiments")
+              )
+            )
+          ), #end second row
+          fluidRow(
+            column(
+              width = 12,
+              box(
+                title = "Data not atribuited to any experiment",
+                width = 12,
+                #DT::DTOutput
+              )
+            )
+          ) #end third row
         ),
         tabItem(
           tabName = "running_view",
