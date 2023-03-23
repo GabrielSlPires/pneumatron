@@ -41,6 +41,26 @@ server <- function(input, output, session) {
     })
     return(data)
   })
+
+  output$pneumatron_ids_table <- DT::renderDT({
+    req(data_raw())
+    data <- data_raw() %>%
+      dplyr::group_by(id) %>%
+      dplyr::summarise(measure = as.character(ceiling(n()/120)),
+                       initial_measure = as.character(min(datetime)),
+                       last_update = as.character(max(datetime)),
+                       voltage = as.character(round(mean(volt), 2))) %>%
+      dplyr::arrange(desc(last_update))
+    
+    DT::datatable(data,
+                  rownames = FALSE,
+                  options = list(
+                    pageLength = 5,
+                    lengthMenu = c(5, 10, 15, 20)
+                    )
+                  )
+  })
+
   data_ad <- reactive({
     req(data_raw())
     data_ad <- tryCatch({

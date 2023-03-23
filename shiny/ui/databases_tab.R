@@ -26,12 +26,13 @@ databases_tab <- tabItem(
       )
     ),
     box(
-      title = "Configuration",
+      title = "Database Summary",
       status = "primary",
-      width = 4,
-      checkboxInput("database_auto_update",
-                    "Enable database auto-update",
-                    value = FALSE)
+      width = 8,
+      column(
+        width = 12,
+        DT::DTOutput("pneumatron_ids_table")
+      )
     )
   ),
 

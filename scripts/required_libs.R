@@ -1,6 +1,7 @@
 packages <- c(
     "data.table",
     "dplyr",
+    "DT",
     "ggplot2",
     "gridExtra",
     "lubridate",
