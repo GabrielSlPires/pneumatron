@@ -56,11 +56,11 @@ server <- function(input, output, session) {
       dplyr::arrange(desc(last_update))
     
     DT::datatable(data,
-                  rownames = FALSE,
-                  options = list(
-                    pageLength = 5,
-                    lengthMenu = c(5, 10, 15, 20)
-                    )
+                  rownames = FALSE
+                  #options = list(
+                  #  pageLength = 5,
+                  #  lengthMenu = c(5, 10, 15, 20)
+                  #  )
                   )
   })
 
@@ -164,11 +164,11 @@ server <- function(input, output, session) {
   })
 
   #render data_psi in page
-  output$psi_file_table <- renderTable({
+  output$psi_file_table <- DT::renderDT({
     req(data_psi())
     df <- dplyr::arrange(data_psi(), id, time)
     df$time <- as.character(df$time)
-    return(df)
+    return(DT::datatable(df))
   })
 
   #read data_psi file

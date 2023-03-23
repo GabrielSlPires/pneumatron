@@ -14,7 +14,7 @@ databases_tab <- tabItem(
   
   fluidRow(
     box(
-      title = "Pneumatron",
+      title = "Pneumatron File",
       status = "primary",
       width = 4,
       fluidRow(
@@ -54,7 +54,28 @@ databases_tab <- tabItem(
           shiny_busy(),
           uiOutput("calculate_data_ad")
         )
-      )
+      ),
+      fluidRow(
+        column(
+          width=12,
+          h4("Water Potential File")
+        )
+      ),
+      fluidRow(
+        column(
+          width = 12,
+          HTML("The Water Pressure table needs to have three columns, <b>id</b>, <b>time</b> (dd.mm.yyyy hh:mm) and <b>pot</b> (MPa).<br>"),
+          br(),
+          fileInput(
+            "psi_file_input",
+            "Select your file with Water Pressure values:",
+            accept = c(
+            "text/csv",
+            "text/comma-separated-values,text/plain",
+            ".csv")), #accept excel
+          verbatimTextOutput("open_data_psi")
+        )
+      ),
     ),
     box(
       title = "Database Summary",
@@ -74,17 +95,7 @@ databases_tab <- tabItem(
       width = 12,
       column(
         width = 3,
-        HTML("The Water Pressure table needs to have three columns, <b>id</b>, <b>time</b> (dd.mm.yyyy hh:mm) and <b>pot</b> (MPa).<br>"),
-        br(),
-        fileInput(
-          "psi_file_input",
-          "Select your file with Water Pressure values:",
-          accept = c(
-          "text/csv",
-          "text/comma-separated-values,text/plain",
-          ".csv")), #accept excel
-        verbatimTextOutput("open_data_psi"),
-        tableOutput('psi_file_table')
+        DT::DTOutput('psi_file_table')
       ),
       column(
         width = 9,
