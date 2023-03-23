@@ -1,3 +1,14 @@
+shiny_busy <- function() { #https://community.rstudio.com/t/shiny-app-show-some-message-while-user-is-waiting-for-output/12822
+  # use &nbsp; for some alignment, if needed
+  HTML("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", paste0(
+    '<span data-display-if="',
+    '$(&#39;html&#39;).attr(&#39;class&#39;)==&#39;shiny-busy&#39;',
+    '">',
+    '<i class="fa fa-spinner fa-pulse fa-fw" style="color:orange"></i>',
+    '</span>'
+  ))
+}
+
 databases_tab <- tabItem(
   tabName = "databases",
   
@@ -40,6 +51,7 @@ databases_tab <- tabItem(
                         "Disable Air Discharged Calculation",
                         value = FALSE),
           h5("Air Discharged:"),
+          shiny_busy(),
           uiOutput("calculate_data_ad")
         )
       )

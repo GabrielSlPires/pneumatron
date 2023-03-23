@@ -68,6 +68,7 @@ body <- dashboardBody(
           fluidRow(
             column(
               width = 12,
+              shiny_busy(),
               plotOutput(
                 "plot_measure_diagnostic",
                 height = "75vh"
