@@ -19,7 +19,7 @@ server <- function(input, output, session) {
 
   shinyFileChoose(input, 'file_database', root=c(root='../data'), session=session)
 
-  data_ad <- reactive({
+  data_raw <- reactive({
     req(input$file_database)
     if (!is.null(input$file_database)) {
       file_selected <- parseFilePaths(root=c(root='../data'), input$file_database)
@@ -31,12 +31,28 @@ server <- function(input, output, session) {
 
     data <- tryCatch({
       if (input$database_auto_update) invalidateLater(900000, session)
-      data <- get_pneumatron_ad(file_path)
+      data <- open_pneumatron_db(file_path)
       output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
       return(data)
 
     }, error = function(e) {
       output$open_data_ad <- renderUI(HTML("Failed to open Pneumatron Database"))
+      return(FALSE)
+    })
+    return(data)
+  })
+  data_ad <- reactive({
+    req(data_raw())
+    data_ad <- tryCatch({
+      data <- pneumatron_air_discharge(data_raw())
+      output$calculate_data_ad <- renderUI(HTML("Pneumatron Air Discharged is ready!"))
+      return(data)
+    }, error = function(e){
+      output$air_discharge_error <- renderText(e)
+      output$calculate_data_ad <- renderUI({
+        HTML("Failed to Calculate Air Discharged!")
+        verbatimTextOutput("air_discharge_error")
+      })
       req(FALSE)
     })
   })
