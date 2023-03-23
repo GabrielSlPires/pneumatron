@@ -19,10 +19,9 @@ sidebar <- dashboardSidebar(
              tabName = "running_view",
              icon = icon("filter") #filter-list
     ),
-    #menuItem("Experiments Managment",
-    #         tabName = "exp_managment_view",
-    #         icon = icon("folder") #filter-list
-    #),
+    menuItem("Measure Diagnostics",
+             tabName = "measure_diagnostics",
+             icon = icon("magnifying-glass")),
     menuItem("Analysis",
              menuSubItem("Filter Experiments",
                                  tabName = "analysis_filter_view"),
@@ -49,6 +48,33 @@ body <- dashboardBody(
   tags$head(tags$script(src = "message-handler.js")),
     tabItems(
         databases_tab,
+        tabItem(
+          tabName = "measure_diagnostics",
+          #plot last day only
+          fluidRow(
+            column(
+              width = 4,
+              dateInput(
+                "diagnostics_initial_date",
+                "Initial date for Measure Diagnostic"
+              ),
+            ),
+            column(
+              width = 8,
+              p("To calculate air discharged for each measurements we use the difference between log line 3 to 30 (vertical lines)"),
+              p("Each measure has 120 log line points, because Pneumatron reads pressure every 500ms.")
+            )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              plotOutput(
+                "plot_measure_diagnostic",
+                height = "75vh"
+              )
+            )
+          )
+        ),
         tabItem(
           tabName = "running_view",
           fluidRow(

@@ -7,6 +7,9 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(plotly))
 suppressPackageStartupMessages(library(gridExtra))
 suppressPackageStartupMessages(library(shinyFiles))
+suppressPackageStartupMessages(library(Cairo))
+
+options(shiny.usecairo = TRUE)
 
 source("helper.R", local = TRUE)
 
@@ -189,6 +192,30 @@ server <- function(input, output, session) {
       }
     )
   })
+
+  #------------- Measure Diagnostic
+  output$plot_measure_diagnostic <- renderPlot({
+    req(data_raw())
+    req(input$diagnostics_initial_date)
+    data_raw() %>% 
+      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date),
+             pressure < 85) %>% 
+      group_by(id) %>% 
+      mutate(measure2 = measure - min(measure)) %>% 
+      ggplot(aes(log_line,
+                 pressure,
+                 color = datetime,
+                 group = paste(measure, group))) +
+      geom_line() +
+      geom_vline(aes(xintercept = 3)) +
+      geom_vline(aes(xintercept = 30)) +
+      facet_wrap(~id, scales = "free") +
+      ylab("Pressure (kPa)") +
+      xlab("log line") +
+      ggtitle("Pressure difference inside each measurement by Pneumatron") +
+      theme_bw()
+  })
+  #-------------
 
   data_ad_experiment_filter <- reactive({
     datetime_filter <- input$filter_experiment_datetime

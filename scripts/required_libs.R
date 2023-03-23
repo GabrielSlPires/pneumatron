@@ -1,4 +1,5 @@
 packages <- c(
+    "Cairo",
     "data.table",
     "dplyr",
     "DT",
