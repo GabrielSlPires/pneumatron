@@ -62,7 +62,9 @@ server <- function(input, output, session) {
   })
 
   data_ad <- reactive({
+    input$calculate_air_discharge
     req(data_raw())
+    req(!input$calculate_air_discharge)
     data_ad <- tryCatch({
       data <- pneumatron_air_discharge(data_raw())
       output$calculate_data_ad <- renderUI(HTML("Pneumatron Air Discharged is ready!"))

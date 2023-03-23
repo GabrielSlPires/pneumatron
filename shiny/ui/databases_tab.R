@@ -23,6 +23,25 @@ databases_tab <- tabItem(
           HTML("<br>"),
           uiOutput("open_data_ad")
         )
+      ),
+      fluidRow(
+        column(
+          width=12,
+          h4("Configuration")
+        )
+      ),
+      fluidRow(
+        column(
+          width = 12,
+          checkboxInput("database_auto_update",
+                        "Enable database auto-update",
+                        value = FALSE),
+          checkboxInput("calculate_air_discharge",
+                        "Disable Air Discharged Calculation",
+                        value = FALSE),
+          h5("Air Discharged:"),
+          uiOutput("calculate_data_ad")
+        )
       )
     ),
     box(
