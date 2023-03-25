@@ -145,7 +145,13 @@ server <- function(input, output, session) {
 
   output$psi_plot_filter_view <- renderPlotly({
       req(data_psi())
-      p <- ggplot(dplyr::filter(data_psi(), id == input$pneumatron_id),
+      datetime_filter <- input$filter_experiment_datetime
+      
+
+      p <- ggplot(dplyr::filter(data_psi(),
+                                id == input$pneumatron_id,
+                                time >= datetime_filter[1] - as.difftime(1, unit="days"),
+                                time <= datetime_filter[2],),
       aes(time, pot, group = 1)) +
         geom_line() +
         theme_bw()
