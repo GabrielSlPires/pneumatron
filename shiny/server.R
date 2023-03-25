@@ -207,7 +207,6 @@ server <- function(input, output, session) {
       filter(datetime >= lubridate::ymd(input$diagnostics_initial_date),
              pressure < 85) %>% 
       group_by(id) %>% 
-      mutate(measure2 = measure - min(measure)) %>% 
       ggplot(aes(log_line,
                  pressure,
                  color = datetime,
@@ -223,6 +222,36 @@ server <- function(input, output, session) {
   })
   #-------------
 
+  #------------- Filter Experiments View
+
+  observeEvent(input$send_to_experiment_table, {
+    req(experiments_table())
+    req(p50_table())
+
+    this_exp <- data.frame(
+      id = input$pneumatron_id,
+      start_datetime = input$filter_experiment_datetime[1],
+      final_datetime = input$filter_experiment_datetime[2],
+      finished = TRUE,
+      database = gsub("../data/",
+                      "",
+                      as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath)),
+      water_potential = input$psi_file_input$name,
+      slope = round(p50_table()["a"], 2),
+      p12 = round(p50_table()["p12"], 2),
+      p50 = round(p50_table()["p50"], 2),
+      p88 = round(p50_table()["p88"], 2)
+    )
+
+    data <- data.frame(experiments_table())
+
+    data[setdiff(names(this_exp), names(data))] <- NA
+    this_exp[setdiff(names(data), names(this_exp))] <- NA
+
+    data = rbind(this_exp, data)
+    experiments_table(data)
+  })
+
   data_ad_experiment_filter <- reactive({
     datetime_filter <- input$filter_experiment_datetime
     data <- data_ad() %>%
@@ -231,7 +260,11 @@ server <- function(input, output, session) {
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if(!is.null(input$psi_file_input)){
-      psi <- dplyr::filter(data_psi(), id == input$pneumatron_id, !is.na(pot))
+      psi <- dplyr::filter(data_psi(),
+                           id == input$pneumatron_id,
+                           time >= datetime_filter[1] - as.difftime(1, unit="days"),
+                           time <= datetime_filter[2],
+                           !is.na(pot))
       data <- extrapolated_wp(data, psi)
     }
     return(data)
@@ -245,7 +278,10 @@ server <- function(input, output, session) {
   })
 
   #Vulnerability curve parameters
-  p50_table <- reactive(pneumatron_p50(dplyr::select(data_ad_experiment_filter(), pad, psi)))
+  p50_table <- reactive({
+    req(data_ad_experiment_filter())
+    pneumatron_p50(dplyr::select(data_ad_experiment_filter(), pad, psi))
+  })
 
   output$filter_view_p50_table <- renderTable({
     req(p50_table())
@@ -444,10 +480,16 @@ server <- function(input, output, session) {
     new_line <- data.frame(id = NA,
                            start_datetime = NA,
                            final_datetime = NA,
-                           finished = FALSE,
+                           finished = NA,
                            database = NA,
                            water_potential = NA)
-    data <- rbind(experiments_table(), new_line)
+
+    data <- data.frame(experiments_table())
+
+    data[setdiff(names(new_line), names(data))] <- NA
+    new_line[setdiff(names(data), names(new_line))] <- NA
+
+    data <- rbind(data, new_line)
 
     experiments_table(data)
   })
@@ -462,7 +504,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$experiment_var_add, {
 
-    req(!input$experiment_var_name %in% colnames(experiments_table()))
+    req(!input$experiment_var_name %in% c(colnames(experiments_table()), ""))
     data <- data.frame(experiments_table())
     data[input$experiment_var_name] <- NA
 

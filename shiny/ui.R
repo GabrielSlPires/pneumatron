@@ -134,7 +134,8 @@ body <- dashboardBody(
                 width = 12,
                 #add some text explaning
                 #do something to allow only right format in columns - need to do it before data not atribuited
-                DT::DTOutput("table_manage_experiments")
+                DT::DTOutput("table_manage_experiments"),
+                style = "overflow-x: scroll;"
               )
             )
           ), #end second row
@@ -171,7 +172,7 @@ body <- dashboardBody(
               width = 12,
               fluidRow(
                 column(
-                  width = 3,
+                  width = 2,
                   selectInput(
                     inputId = "pneumatron_id",
                     label = "Select Pneumatron ID",
@@ -179,7 +180,7 @@ body <- dashboardBody(
                   )
                 ),
                 column(
-                  width = 9,
+                  width = 8,
                   align = "center",
                   sliderInput("filter_experiment_datetime",
                               label = "Time range",
@@ -190,13 +191,19 @@ body <- dashboardBody(
                               step = 1,
                               width = "90%"
                   )
+                ),
+                column(
+                  width = 2,
+                  align = "center",
+                  h4("Save Experiment"),
+                  actionButton("send_to_experiment_table", "Save")
                 )
               )
             )
           ),
           fluidRow(
             box(
-              title = "Selected Mesurements",
+              title = "Mesurements",
               width = 12,
               column(
                 width = 6,
