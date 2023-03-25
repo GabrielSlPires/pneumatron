@@ -315,3 +315,23 @@ validate_data_psi <-function(file) {
 
   return(validation)
 }
+
+filter_data_by_experiment <- function(d, e, experiment_finished = FALSE) {
+  
+  e$finished <- as.logical(e$finished)
+  if (any(is.na(e$finished))) stop("Finished column in experiment with non logical format")
+  
+  e <- e %>% 
+    dplyr::filter(finished == experiment_finished) %>% 
+    dplyr::select(id, s = start_datetime, f = final_datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  d <- d %>% 
+    dplyr::select(id, datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  
+  filter <- apply(e, 1, function(x) d$id == x["id"] & d$datetime >= x["s"] & d$datetime <= x["f"])
+  
+  result <- if (experiment_finished) apply(filter, 1, any) else apply(!filter, 1, all)
+  
+  return(result)
+}
