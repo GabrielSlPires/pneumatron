@@ -316,7 +316,7 @@ validate_data_psi <-function(file) {
   return(validation)
 }
 
-filter_data_by_experiment <- function(d, e, experiment_finished = FALSE) {
+filter_data_by_experiment <- function(d, e, experiment_finished = TRUE) {
   
   e$finished <- as.logical(e$finished)
   if (any(is.na(e$finished))) stop("Finished column in experiment with non logical format")

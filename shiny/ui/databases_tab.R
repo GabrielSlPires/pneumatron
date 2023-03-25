@@ -47,10 +47,16 @@ databases_tab <- tabItem(
           checkboxInput("database_auto_update",
                         "Enable database auto-update",
                         value = FALSE),
+          selectInput("filter_data_raw_with_experiments",
+                      "Select data:",
+                      choices = c("Use all data" = "all",
+                                  "Use only running experiments (recommended)" = TRUE,
+                                  "Use only finished experiments" = FALSE),
+                      selected = TRUE),
           checkboxInput("calculate_air_discharge",
                         "Disable Air Discharged Calculation",
                         value = FALSE),
-          h5("Air Discharged:"),
+          h5("Air Discharged Calculation:"),
           shiny_busy(),
           uiOutput("calculate_data_ad")
         )
