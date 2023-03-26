@@ -176,6 +176,7 @@ server <- function(input, output, session) {
       p <- ggplot(na.omit(data_psi()),
       aes(time, pot, group = factor(id), color = factor(id))) +
         geom_line() +
+        geom_point(size = 2) +
         theme_bw() +
         scale_color_manual(name = "Pneumatron",
                            values = getPalette(colourCount))
