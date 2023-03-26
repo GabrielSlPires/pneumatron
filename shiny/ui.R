@@ -157,6 +157,7 @@ body <- dashboardBody(
               width = 12,
               align = "center",
               h3("Running Experiment"),
+              shiny_busy(),
               HTML("<br>")
             )
           ),
