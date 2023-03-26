@@ -11,6 +11,7 @@ open_pneumatron_db <- function(file_name) {
     #Pneumatron V2
     try({
       data <- data.table::fread(file_name,
+                                blank.lines.skip = TRUE,
                                 select = 1:18,
                                 col.names = c("id",
                                               "ms",
@@ -40,6 +41,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:13,
                                   col.names = c("id",
                                                 "ms",
@@ -64,6 +66,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:11,
                                   col.names = c("id",
                                                 "group",
@@ -85,6 +88,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:6,
                                   col.names = c("id",
                                                 "seq",
@@ -106,7 +110,8 @@ open_pneumatron_db <- function(file_name) {
         bkp <- data
         data <- tryCatch({
           data <- data.table::fread(file_name,
-                                  header = FALSE)
+                                    blank.lines.skip = TRUE,
+                                    header = FALSE)
           data <- data.frame(
             reshape2::colsplit(string = data$V1,
                                pattern = ",",
