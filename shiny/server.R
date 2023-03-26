@@ -8,6 +8,7 @@ suppressPackageStartupMessages(library(plotly))
 suppressPackageStartupMessages(library(gridExtra))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(Cairo))
+suppressPackageStartupMessages(library(RColorBrewer))
 
 options(shiny.usecairo = TRUE)
 
@@ -167,12 +168,17 @@ server <- function(input, output, session) {
 
   output$psi_plot_databases_view <- renderPlotly({
       req(data_psi())
+
+      #Dinamically change color pallete n()
+      colourCount = length(unique(data_psi()$id))
+      getPalette = colorRampPalette(brewer.pal(12, "Paired"))
+
       p <- ggplot(na.omit(data_psi()),
       aes(time, pot, group = factor(id), color = factor(id))) +
         geom_line() +
         theme_bw() +
-        scale_color_brewer(name = "Pneumatron",
-                           palette = "Set1")
+        scale_color_manual(name = "Pneumatron",
+                           values = getPalette(colourCount))
       ggplotly(p)
   })
 
