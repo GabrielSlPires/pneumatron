@@ -248,21 +248,17 @@ server <- function(input, output, session) {
 
   observeEvent(input$send_to_experiment_table, {
     req(experiments_table())
-    req(p50_table())
 
     this_exp <- data.frame(
-      id = input$pneumatron_id,
+      exp_id = max(experiments_table()$exp_id) + 1,
+      pneumatron = input$pneumatron_id,
       start_datetime = input$filter_experiment_datetime[1],
       final_datetime = input$filter_experiment_datetime[2],
       finished = TRUE,
       database = gsub("../data/",
                       "",
                       as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath)),
-      water_potential = input$psi_file_input$name,
-      slope = round(p50_table()["a"], 2),
-      p12 = round(p50_table()["p12"], 2),
-      p50 = round(p50_table()["p50"], 2),
-      p88 = round(p50_table()["p88"], 2)
+      water_potential = input$psi_file_input$name
     )
 
     data <- data.frame(experiments_table())
@@ -499,7 +495,8 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$experiment_add, {
-    new_line <- data.frame(id = NA,
+    new_line <- data.frame(exp_id = max(experiments_table()$exp_id) + 1,
+                           pneumatron = NA,
                            start_datetime = NA,
                            final_datetime = NA,
                            finished = NA,
