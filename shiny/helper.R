@@ -351,3 +351,10 @@ filter_data_by_experiment <- function(data, filter_table) {
   # Return the filtered data
   return(data[result])
 }
+
+open_data_psi <- function(file_path) {
+  df <- data.table::fread(file_path, fill = TRUE)
+  df$time <- lubridate::dmy_hm(df$time)
+  df <- dplyr::filter(df, !is.na(id))
+  return(df)
+}
