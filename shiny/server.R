@@ -168,7 +168,6 @@ server <- function(input, output, session) {
 
   output$psi_plot_databases_view <- renderPlotly({
       req(data_psi())
-
       #Dinamically change color pallete n()
       colourCount = length(unique(data_psi()$id))
       getPalette = colorRampPalette(brewer.pal(12, "Paired"))
@@ -192,33 +191,23 @@ server <- function(input, output, session) {
   })
 
   #read data_psi file
-  output$open_data_psi <- renderText("Waiting for table upload.")
-  data_psi <- reactive({
-    #read only if file is uploaded
+  output$open_data_psi_status <- renderText("Waiting for table upload.")
+  data_psi <- eventReactive(input$psi_file_input, {
+
     req(input$psi_file_input)
-    df <- tryCatch(
-      {
-        if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-        df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
-        df$time <- lubridate::dmy_hm(df$time)
-        df <- dplyr::filter(df, !is.na(id))
 
-        output$open_data_psi <- renderText("Table is ready!")
+    df <- tryCatch({
 
-        #Filter water pressure data data by experiments
-        if (input$filter_data_raw_with_experiments == "all") return(df) #all data, no filter
+      if(!validate_data_psi(input$psi_file_input$datapath)) stop()
+      df <- open_data_psi(input$psi_file_input$datapath)
+      output$open_data_psi_status <- renderText("Table is ready!")
+      df
 
-        req(experiments_table())
-        filter <- filter_data_by_experiment(dplyr::rename(df, datetime = time), experiments_table()) #get all finished experiments 
-
-        if (input$filter_data_raw_with_experiments) filter <- !filter #if TRUE, get only running experiments
-        return(df[filter,])
-      },
-      error = function(e) {
-        output$open_data_psi <- renderText("Failed to open.")
-        req(FALSE)
-      }
-    )
+    }, error = function(e) {
+      output$open_data_psi_status <- renderText("Failed to open.")
+      req(FALSE)
+    })
+    return(df)
   })
 
   #------------- Measure Diagnostic
@@ -248,6 +237,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$send_to_experiment_table, {
     req(experiments_table())
+    req(data_ad_experiment_filter())
 
     this_exp <- data.frame(
       exp_id = max(experiments_table()$exp_id) + 1,
@@ -268,6 +258,7 @@ server <- function(input, output, session) {
 
     data = rbind(this_exp, data)
     experiments_table(data)
+    updateTabItems(session, "tabs", "exp_managment_view")
   })
 
   data_ad_experiment_filter <- reactive({
@@ -398,29 +389,6 @@ server <- function(input, output, session) {
     p
   })
 
-  output$experiment_data <- renderTable({
-    df <- data.frame(
-      Parameter = c(
-        "Pneumatron ID:",
-        "Plant ID:",
-        "Initial Date:",
-        "End Date:",
-        "Database:",
-        "Water Measures:"
-        ),
-      Value =c(
-        input$pneumatron_id,
-        NA,
-        input$filter_experiment_datetime[1],
-        input$filter_experiment_datetime[2],
-        as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath),
-        input$psi_file_input$name
-        )
-    )
-    print(df)
-    return(df)
-  })
-
   observeEvent(input$btn_save_data, {
     if(input$file_name_save == ""){
       session$sendCustomMessage(type = 'testmessage',
@@ -519,6 +487,16 @@ server <- function(input, output, session) {
       data <- data[-as.numeric(input$table_manage_experiments_rows_selected),]
     }
     experiments_table(data)
+  })
+
+  observeEvent(input$experiment_open, { #pegar somente o primeiro
+    data = experiments_table()
+    if (!is.null(input$table_manage_experiments_rows_selected)) {
+      data <- data[-as.numeric(input$table_manage_experiments_rows_selected),]
+    }
+
+    updateTabItems(session, "tabs", "analysis_filter_view")
+
   })
 
   observeEvent(input$experiment_var_add, {
