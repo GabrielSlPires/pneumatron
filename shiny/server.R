@@ -199,20 +199,12 @@ server <- function(input, output, session) {
     df <- tryCatch(
       {
         if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-        df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
+        df <- data.table::fread(input$psi_file_input$datapath, fill=TRUE)
         df$time <- lubridate::dmy_hm(df$time)
         df <- dplyr::filter(df, !is.na(id))
 
         output$open_data_psi <- renderText("Table is ready!")
-
-        #Filter water pressure data data by experiments
-        if (input$filter_data_raw_with_experiments == "all") return(df) #all data, no filter
-
-        req(experiments_table())
-        filter <- filter_data_by_experiment(dplyr::rename(df, datetime = time), experiments_table()) #get all finished experiments 
-
-        if (input$filter_data_raw_with_experiments) filter <- !filter #if TRUE, get only running experiments
-        return(df[filter,])
+        return(df)
       },
       error = function(e) {
         output$open_data_psi <- renderText("Failed to open.")
