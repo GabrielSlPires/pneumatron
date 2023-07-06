@@ -321,32 +321,22 @@ validate_data_psi <-function(file) {
   return(validation)
 }
 
-filter_data_by_experiment <- function(data, filter_table) {
+filter_data_by_experiment <- function(d, e, experiment_finished = TRUE) {
   
-  # Set up the filter table
-  data.table::setDT(filter_table)
+  e$finished <- as.logical(e$finished)
+  if (any(is.na(e$finished))) stop("Finished column in experiment with non logical format")
   
-  # Create an index for the row number in data table
-  data[, row_id := 1:.N]
-  data.table::setDT(data, key = "row_id")
+  e <- e %>% 
+    dplyr::filter(finished == experiment_finished) %>% 
+    dplyr::select(id, s = start_datetime, f = final_datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  d <- d %>% 
+    dplyr::select(id, datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
   
-  # Create an empty logical vector to store filter results
-  result <- logical(nrow(data))
+  filter <- apply(e, 1, function(x) d$id == x["id"] & d$datetime >= x["s"] & d$datetime <= x["f"])
   
-  # Loop through the filter table and apply the filter for each id
-  for (i in 1:nrow(filter_table)) {
-    
-    # Get the current id and date range from the filter table
-    id <- filter_table$pneumatron[i]
-    start_date <- filter_table$start_datetime[i]
-    end_date <- filter_table$final_datetime[i]
-    
-    # Filter the data table based on the current id and date range
-    current_filter <- data[datetime >= start_date & datetime <= end_date & id == id]
-    
-    # Update the result vector with the current filter
-    if (nrow(current_filter) > 0) result[current_filter$row_id] <- TRUE
-  }
+  result <- if (experiment_finished) apply(filter, 1, any) else apply(!filter, 1, all)
   
   # Return the filtered data
   return(data[result])
