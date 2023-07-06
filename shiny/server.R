@@ -37,20 +37,13 @@ server <- function(input, output, session) {
       if (input$database_auto_update) invalidateLater(900000, session)
       data <- open_pneumatron_db(file_path)
       output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
-
-      #Filter raw data by experiments
-      if (input$filter_data_raw_with_experiments == "all") return(data) #all data, no filter
-
-      req(experiments_table())
-      filter <- filter_data_by_experiment(data, experiments_table()) #get all finished experiments 
-
-      if (input$filter_data_raw_with_experiments) filter <- !filter #if TRUE, get only running experiments
-      return(data[filter,])
+      return(data)
 
     }, error = function(e) {
       output$open_data_ad <- renderUI(HTML("Failed to open Pneumatron Database"))
       return(FALSE)
     })
+    return(data)
   })
 
   output$pneumatron_ids_table <- DT::renderDT({
