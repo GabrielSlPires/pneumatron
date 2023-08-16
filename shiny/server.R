@@ -206,12 +206,14 @@ server <- function(input, output, session) {
     )
   })
 
+
   #------------- Measure Diagnostic
   output$plot_measure_diagnostic <- renderPlot({
     req(data_raw())
     req(input$diagnostics_initial_date)
     data_raw() %>% 
-      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date),
+      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date) |
+             datetime >= lubridate::as_date(max(datetime)),
              pressure < 85) %>% 
       group_by(id) %>% 
       ggplot(aes(log_line,
