@@ -333,11 +333,10 @@ server <- function(input, output, session) {
       ylab("Air Discharge (%)") + 
       annotation_custom(tableGrob(data.frame(estimated = round(p50_table(), 2)),
                               theme = ttheme_minimal()),
-                    xmin = table_x_min,
-                    xmax = table_x_max,
-                    ymin = input$p50_plot_y_axis_min,
-                    ymax = input$p50_plot_y_axis_max)
-
+                        xmin = table_x_min,
+                        xmax = table_x_max,
+                        ymin = input$p50_plot_y_axis_min,
+                        ymax = input$p50_plot_y_axis_max)
     p
   })
 
