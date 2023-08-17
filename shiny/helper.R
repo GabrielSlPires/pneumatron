@@ -199,7 +199,7 @@ pneumatron_px_proximity <- function(data, p) {
 
 initial_pressure <- function(log_line, pressure) {
   tryCatch({
-    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
+    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure, na.rm = TRUE))], na.rm = TRUE)
   },
   error = function(e) init <- 3,
   warning = function(w) init <- 3)
@@ -253,8 +253,8 @@ pneumatron_air_discharge <- function(pneumatron_data,
                          initial_pressure(log_line, pressure) + pf_s*2),
                  between(n(), 60, 120)) %>% 
     dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
-                     r_squared = summary(lm(pressure ~ log_line))$r.squared,
-                     p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
+                     #r_squared = summary(lm(pressure ~ log_line))$r.squared,
+                     #p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
                      pressure_diff = slope*(pf_s*2 - pi_s*2),
                      ad_mol = (pressure_diff*100*Vr)/(R*temp), 
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
@@ -262,7 +262,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                      datetime = min(datetime),
                      .groups = "drop") %>% 
-    dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
+    #dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
@@ -330,32 +330,22 @@ validate_data_psi <-function(file) {
   return(validation)
 }
 
-filter_data_by_experiment <- function(data, filter_table) {
+filter_data_by_experiment <- function(d, e, experiment_finished = FALSE) {
   
-  # Set up the filter table
-  data.table::setDT(filter_table)
+  e$finished <- as.logical(e$finished)
+  if (any(is.na(e$finished))) stop("Finished column in experiment with non logical format")
   
-  # Create an index for the row number in data table
-  data[, row_id := 1:.N]
-  data.table::setDT(data, key = "row_id")
+  e <- e %>% 
+    dplyr::filter(finished == experiment_finished) %>% 
+    dplyr::select(id, s = start_datetime, f = final_datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  d <- d %>% 
+    dplyr::select(id, datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
   
-  # Create an empty logical vector to store filter results
-  result <- logical(nrow(data))
+  filter <- apply(e, 1, function(x) d$id == x["id"] & d$datetime >= x["s"] & d$datetime <= x["f"])
   
-  # Loop through the filter table and apply the filter for each id
-  for (i in 1:nrow(filter_table)) {
-    
-    # Get the current id and date range from the filter table
-    id <- filter_table$pneumatron[i]
-    start_date <- filter_table$start_datetime[i]
-    end_date <- filter_table$final_datetime[i]
-    
-    # Filter the data table based on the current id and date range
-    current_filter <- data[datetime >= start_date & datetime <= end_date & id == id]
-    
-    # Update the result vector with the current filter
-    if (nrow(current_filter) > 0) result[current_filter$row_id] <- TRUE
-  }
+  result <- if (experiment_finished) apply(filter, 1, any) else apply(!filter, 1, all)
   
   # Return the filtered data
   return(data[result])

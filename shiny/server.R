@@ -37,20 +37,13 @@ server <- function(input, output, session) {
       if (input$database_auto_update) invalidateLater(900000, session)
       data <- open_pneumatron_db(file_path)
       output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
-
-      #Filter raw data by experiments
-      if (input$filter_data_raw_with_experiments == "all") return(data) #all data, no filter
-
-      req(experiments_table())
-      filter <- filter_data_by_experiment(data, experiments_table()) #get all finished experiments 
-
-      if (input$filter_data_raw_with_experiments) filter <- !filter #if TRUE, get only running experiments
-      return(data[filter,])
+      return(data)
 
     }, error = function(e) {
       output$open_data_ad <- renderUI(HTML("Failed to open Pneumatron Database"))
       return(FALSE)
     })
+    return(data)
   })
 
   output$pneumatron_ids_table <- DT::renderDT({
@@ -195,27 +188,31 @@ server <- function(input, output, session) {
   data_psi <- eventReactive(input$psi_file_input, {
 
     req(input$psi_file_input)
+    df <- tryCatch(
+      {
+        if(!validate_data_psi(input$psi_file_input$datapath)) stop()
+        df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
+        df$time <- lubridate::dmy_hm(df$time)
+        df <- dplyr::filter(df, !is.na(id))
 
-    df <- tryCatch({
-
-      if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-      df <- open_data_psi(input$psi_file_input$datapath)
-      output$open_data_psi_status <- renderText("Table is ready!")
-      df
-
-    }, error = function(e) {
-      output$open_data_psi_status <- renderText("Failed to open.")
-      req(FALSE)
-    })
-    return(df)
+        output$open_data_psi <- renderText("Table is ready!")
+        return(df)
+      },
+      error = function(e) {
+        output$open_data_psi <- renderText("Failed to open.")
+        req(FALSE)
+      }
+    )
   })
+
 
   #------------- Measure Diagnostic
   output$plot_measure_diagnostic <- renderPlot({
     req(data_raw())
     req(input$diagnostics_initial_date)
     data_raw() %>% 
-      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date),
+      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date) |
+             datetime >= lubridate::as_date(max(datetime)),
              pressure < 85) %>% 
       group_by(id) %>% 
       ggplot(aes(log_line,
@@ -339,11 +336,10 @@ server <- function(input, output, session) {
       ylab("Air Discharge (%)") + 
       annotation_custom(tableGrob(data.frame(estimated = round(p50_table(), 2)),
                               theme = ttheme_minimal()),
-                    xmin = table_x_min,
-                    xmax = table_x_max,
-                    ymin = input$p50_plot_y_axis_min,
-                    ymax = input$p50_plot_y_axis_max)
-
+                        xmin = table_x_min,
+                        xmax = table_x_max,
+                        ymin = input$p50_plot_y_axis_min,
+                        ymax = input$p50_plot_y_axis_max)
     p
   })
 

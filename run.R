@@ -5,7 +5,7 @@ source("scripts/required_libs.R")
 serial::listPorts()
 
 reciver_serial_port <- c("COM12") #define pneumatron receiver COM port
-file_name <- "pneumatron_database" #define where to save your files. change for week files?
+file_name <- "pneumatron_database" #define where to save your files. 
 
 #To start reading the pneumatron
 rstudioapi::jobRunScript("scripts/00-read_pneumatron.R", importEnv = TRUE)
