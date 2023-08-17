@@ -1,4 +1,4 @@
-get_pneumatron_ad <- function(file_name) {
+get_pneumatron_ad <- function(file_name) { #não estou mais usando isso
     data <- open_pneumatron_db(file_name)
     data <- pneumatron_air_discharge(data)
 
@@ -213,6 +213,15 @@ pneumatron_air_discharge <- function(pneumatron_data,
                                      R = 8.3144621,
                                      temp = 293.15) {
   library(dplyr)
+
+
+  #data.table: The data.table package offers fast grouping operations and other data manipulation functions. It is designed to be efficient for large datasets and can handle millions of rows very quickly.
+
+#sqldf: The sqldf package allows you to manipulate data frames using SQL statements. It can be a good option for complex queries involving multiple tables.
+
+#dtplyr: The dtplyr package provides a dplyr interface to data.tables, allowing you to use familiar dplyr syntax while taking advantage of the speed of data.tables.
+
+#multidplyr: The multidplyr package allows you to distribute dplyr operations across multiple cores or machines, making it possible to handle large datasets more efficiently.
   
   Vr = reservoir*10^-6
   #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 

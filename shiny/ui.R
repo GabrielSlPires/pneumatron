@@ -11,6 +11,7 @@ sapply(list.files("ui/",
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
+    id = "tabs",
     menuItem("Databases",
              tabName = "databases",
              icon = icon("database") #filter-list
@@ -33,10 +34,6 @@ sidebar <- dashboardSidebar(
                                  tabName = "analysis_plots_view"),
              tabName = "analysis_view",
              icon = icon("chart-bar")
-    ),
-    menuItem("Manage Experiments",
-             tabName = "exp_managment_view",
-             icon = icon("folder")
     ),
     menuItem("About",
              icon = icon("th"),
@@ -90,16 +87,22 @@ body <- dashboardBody(
                 title = "Table Settings",
                 width = 12,
                 column(
-                  width = 3,
+                  width = 2,
                   align = "center",
                   h4("Add New Experiment"),
                   actionButton("experiment_add", "Add")
                 ),
                 column(
-                  width = 3,
+                  width = 2,
                   align = "center",
                   h4("Delete Selected Experiment"),
                   actionButton("experiment_delete", "Delete")
+                ),
+                column(
+                  width = 2,
+                  align = "center",
+                  h4("Open Selected Experiment"),
+                  actionButton("experiment_open", "Open")
                 ),
                 column(
                   width = 3,
@@ -119,7 +122,7 @@ body <- dashboardBody(
                   )
                 ),
                 column(
-                  width = 3,
+                  width = 2,
                   align = "center",
                   h4("Save Experiment Table"),
                   actionButton("experiment_save", "Save")
@@ -247,20 +250,6 @@ body <- dashboardBody(
             )
           )
         ),
-
-        tabItem(
-          tabName = "save_experiment_view",
-          fluidRow(
-            column(
-              width = 12,
-              h2 = "Save Experiment"
-            )
-          ),
-          fluidRow(
-            tableOutput("experiment_data")
-          )
-        ),
-
 
         tabItem(
           tabName = "analysis_plots_view",
