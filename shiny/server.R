@@ -192,7 +192,7 @@ server <- function(input, output, session) {
     df <- tryCatch(
       {
         if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-        df <- data.table::fread(input$psi_file_input$datapath, fill=TRUE)
+        df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
         df$time <- lubridate::dmy_hm(df$time)
         df <- dplyr::filter(df, !is.na(id))
 
