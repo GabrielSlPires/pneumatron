@@ -7,3 +7,6 @@ result/
 devices/
 pneumatron-dashboard.docx
 shiny/.Rhistory
+.RDataTmp
+.RDataTmp1
+.RDataTmp2

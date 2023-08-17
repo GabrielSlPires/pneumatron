@@ -7,10 +7,14 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(plotly))
 suppressPackageStartupMessages(library(gridExtra))
 suppressPackageStartupMessages(library(shinyFiles))
+suppressPackageStartupMessages(library(Cairo))
+suppressPackageStartupMessages(library(RColorBrewer))
+
+options(shiny.usecairo = TRUE)
 
 source("helper.R", local = TRUE)
 
-#file_name <- "2022_08_01"
+experiment_path <- "../data/experiments.csv"
 
 server <- function(input, output, session) {
 
@@ -19,7 +23,7 @@ server <- function(input, output, session) {
 
   shinyFileChoose(input, 'file_database', root=c(root='../data'), session=session)
 
-  data_ad <- reactive({
+  data_raw <- reactive({
     req(input$file_database)
     if (!is.null(input$file_database)) {
       file_selected <- parseFilePaths(root=c(root='../data'), input$file_database)
@@ -30,13 +34,51 @@ server <- function(input, output, session) {
     output$open_data_ad <- renderUI(HTML("Loading..."))
 
     data <- tryCatch({
-      invalidateLater(900000, session)
-      data <- get_pneumatron_ad(file_path)
+      if (input$database_auto_update) invalidateLater(900000, session)
+      data <- open_pneumatron_db(file_path)
       output$open_data_ad <- renderUI(HTML("Pneumatron Database is ready!"))
       return(data)
 
     }, error = function(e) {
       output$open_data_ad <- renderUI(HTML("Failed to open Pneumatron Database"))
+      return(FALSE)
+    })
+    return(data)
+  })
+
+  output$pneumatron_ids_table <- DT::renderDT({
+    req(data_raw())
+    data <- data_raw() %>%
+      dplyr::group_by(id) %>%
+      dplyr::summarise(measure = as.character(ceiling(n()/120)),
+                       initial_measure = as.character(min(datetime)),
+                       last_update = as.character(max(datetime)),
+                       voltage = as.character(round(mean(volt), 2))) %>%
+      dplyr::arrange(desc(last_update))
+    
+    DT::datatable(data,
+                  rownames = FALSE
+                  #options = list(
+                  #  pageLength = 5,
+                  #  lengthMenu = c(5, 10, 15, 20)
+                  #  )
+                  )
+  })
+
+  data_ad <- reactive({
+    input$calculate_air_discharge
+    req(data_raw())
+    req(!input$calculate_air_discharge)
+    data_ad <- tryCatch({
+      data <- pneumatron_air_discharge(data_raw())
+      output$calculate_data_ad <- renderUI(HTML("Pneumatron Air Discharged is ready!"))
+      return(data)
+    }, error = function(e){
+      output$air_discharge_error <- renderText(e)
+      output$calculate_data_ad <- renderUI({
+        HTML("Failed to Calculate Air Discharged!")
+        verbatimTextOutput("air_discharge_error")
+      })
       req(FALSE)
     })
   })
@@ -104,7 +146,13 @@ server <- function(input, output, session) {
 
   output$psi_plot_filter_view <- renderPlotly({
       req(data_psi())
-      p <- ggplot(dplyr::filter(data_psi(), id == input$pneumatron_id),
+      datetime_filter <- input$filter_experiment_datetime
+      
+
+      p <- ggplot(dplyr::filter(data_psi(),
+                                id == input$pneumatron_id,
+                                time >= datetime_filter[1] - as.difftime(1, unit="days"),
+                                time <= datetime_filter[2],),
       aes(time, pot, group = 1)) +
         geom_line() +
         theme_bw()
@@ -113,21 +161,27 @@ server <- function(input, output, session) {
 
   output$psi_plot_databases_view <- renderPlotly({
       req(data_psi())
+
+      #Dinamically change color pallete n()
+      colourCount = length(unique(data_psi()$id))
+      getPalette = colorRampPalette(brewer.pal(12, "Paired"))
+
       p <- ggplot(na.omit(data_psi()),
       aes(time, pot, group = factor(id), color = factor(id))) +
         geom_line() +
+        geom_point(size = 2) +
         theme_bw() +
-        scale_color_brewer(name = "Pneumatron",
-                           palette = "Set1")
+        scale_color_manual(name = "Pneumatron",
+                           values = getPalette(colourCount))
       ggplotly(p)
   })
 
   #render data_psi in page
-  output$psi_file_table <- renderTable({
+  output$psi_file_table <- DT::renderDT({
     req(data_psi())
     df <- dplyr::arrange(data_psi(), id, time)
     df$time <- as.character(df$time)
-    return(df)
+    return(DT::datatable(df))
   })
 
   #read data_psi file
@@ -138,7 +192,7 @@ server <- function(input, output, session) {
     df <- tryCatch(
       {
         if(!validate_data_psi(input$psi_file_input$datapath)) stop()
-        df <- data.table::fread(input$psi_file_input$datapath, fill=TRUE)
+        df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
         df$time <- lubridate::dmy_hm(df$time)
         df <- dplyr::filter(df, !is.na(id))
 
@@ -152,6 +206,57 @@ server <- function(input, output, session) {
     )
   })
 
+
+  #------------- Measure Diagnostic
+  output$plot_measure_diagnostic <- renderPlot({
+    req(data_raw())
+    req(input$diagnostics_initial_date)
+    data_raw() %>% 
+      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date) |
+             datetime >= lubridate::as_date(max(datetime)),
+             pressure < 85) %>% 
+      group_by(id) %>% 
+      ggplot(aes(log_line,
+                 pressure,
+                 color = datetime,
+                 group = paste(measure, group))) +
+      geom_line() +
+      geom_vline(aes(xintercept = 3)) +
+      geom_vline(aes(xintercept = 30)) +
+      facet_wrap(~id, scales = "free") +
+      ylab("Pressure (kPa)") +
+      xlab("log line") +
+      ggtitle("Pressure difference inside each measurement by Pneumatron") +
+      theme_bw()
+  })
+  #-------------
+
+  #------------- Filter Experiments View
+
+  observeEvent(input$send_to_experiment_table, {
+    req(experiments_table())
+
+    this_exp <- data.frame(
+      exp_id = max(experiments_table()$exp_id) + 1,
+      pneumatron = input$pneumatron_id,
+      start_datetime = input$filter_experiment_datetime[1],
+      final_datetime = input$filter_experiment_datetime[2],
+      finished = TRUE,
+      database = gsub("../data/",
+                      "",
+                      as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath)),
+      water_potential = input$psi_file_input$name
+    )
+
+    data <- data.frame(experiments_table())
+
+    data[setdiff(names(this_exp), names(data))] <- NA
+    this_exp[setdiff(names(data), names(this_exp))] <- NA
+
+    data = rbind(this_exp, data)
+    experiments_table(data)
+  })
+
   data_ad_experiment_filter <- reactive({
     datetime_filter <- input$filter_experiment_datetime
     data <- data_ad() %>%
@@ -160,7 +265,11 @@ server <- function(input, output, session) {
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if(!is.null(input$psi_file_input)){
-      psi <- dplyr::filter(data_psi(), id == input$pneumatron_id, !is.na(pot))
+      psi <- dplyr::filter(data_psi(),
+                           id == input$pneumatron_id,
+                           time >= datetime_filter[1] - as.difftime(1, unit="days"),
+                           time <= datetime_filter[2],
+                           !is.na(pot))
       data <- extrapolated_wp(data, psi)
     }
     return(data)
@@ -173,45 +282,63 @@ server <- function(input, output, session) {
     ggplotly(p)
   })
 
+  #Vulnerability curve parameters
+  p50_table <- reactive({
+    req(data_ad_experiment_filter())
+    pneumatron_p50(dplyr::select(data_ad_experiment_filter(), pad, psi))
+  })
+
+  output$filter_view_p50_table <- renderTable({
+    req(p50_table())
+
+    df <- data.frame(variable = names(p50_table()),
+                     estimated = p50_table(),
+                     measured = c(NA,
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 12),
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 50),
+                                  pneumatron_px_proximity(data_ad_experiment_filter(), 88)))
+    return(df)
+  })
+
   #Analysis plots
   output$pneumatron_plot_psi_pad <- renderPlot(plot_psi_pad())
   plot_psi_pad <- reactive({
     #apply non linear fit
-    fit.pad <- try.nls(work.table = data_ad_experiment_filter() %>%
-                         select(pad, psi),
-                       model = pad ~ 100/(1 + exp(a*(psi - p50))),
-                       start.values = data.frame(parameter = c("a","p50"),
-                                                 min = c(0,-10),
-                                                 max = c(5,0)))
-    
-    a.pad = summary(fit.pad)$coefficients[1]
-    p50.pad = summary(fit.pad)$coefficients[2]
-    p88.pad = log(12/88,exp(1))/a.pad + p50.pad
-    p12.pad = log(88/12,exp(1))/a.pad + p50.pad
 
-    p50_table <- cbind(variable = c("p12", "p50", "p88"),
-                      values = c(round(as.numeric(p12.pad), 2),
-                                  round(as.numeric(p50.pad), 2),
-                                  round(as.numeric(p88.pad), 2)))
+    #dar opção de escrever posição da tabela
+    table_x_min <- data_ad_experiment_filter() %>% 
+      mutate(psi = psi*-1,
+             x_axis_norm = (psi - min(psi))/(max(psi) - min(psi))*100) %>%
+      slice(which.min(abs(x_axis_norm - input$p50_plot_x_axis_min))) %>%
+      mutate(psi = psi*-1) %>%
+      select(psi) %>% 
+      as.numeric()
 
+    table_x_max <- data_ad_experiment_filter() %>% 
+      mutate(psi = psi*-1,
+             x_axis_norm = (psi - min(psi))/(max(psi) - min(psi))*100) %>%
+      slice(which.min(abs(x_axis_norm - input$p50_plot_x_axis_max))) %>%
+      mutate(psi = psi*-1) %>%
+      select(psi) %>% 
+      as.numeric()
 
-    p <- ggplot(data_ad_experiment_filter(), aes(psi, pad)) +
+    p <- ggplot(data_ad_experiment_filter(),
+                aes(psi, pad)) +
       geom_point() +
-      stat_function(fun = function(x) 100/(1 + exp(a.pad*(x - p50.pad))),
+      stat_function(fun = function(x) 100/(1 + exp(p50_table()["a"]*(x - p50_table()["p50"]))),
                 color = "royalblue", 
                 size = 1) +
-      geom_vline(xintercept = p50.pad) + 
+      geom_vline(xintercept = p50_table()["p50"]) + 
       theme_bw() +
       ggtitle(input$title_analysis_plots) +
       xlab(expression(paste(psi, " (MPa)"))) +
-      ylab("Air Discharge (%)") +
-      annotation_custom(tableGrob(p50_table,
+      ylab("Air Discharge (%)") + 
+      annotation_custom(tableGrob(data.frame(estimated = round(p50_table(), 2)),
                               theme = ttheme_minimal()),
-                    xmin = -Inf,
-                    xmax = p50.pad,
-                    ymin = 0,
-                    ymax = 50)
-
+                        xmin = table_x_min,
+                        xmax = table_x_max,
+                        ymin = input$p50_plot_y_axis_min,
+                        ymax = input$p50_plot_y_axis_max)
     p
   })
 
@@ -257,6 +384,29 @@ server <- function(input, output, session) {
     p
   })
 
+  output$experiment_data <- renderTable({
+    df <- data.frame(
+      Parameter = c(
+        "Pneumatron ID:",
+        "Plant ID:",
+        "Initial Date:",
+        "End Date:",
+        "Database:",
+        "Water Measures:"
+        ),
+      Value =c(
+        input$pneumatron_id,
+        NA,
+        input$filter_experiment_datetime[1],
+        input$filter_experiment_datetime[2],
+        as.character(parseFilePaths(root=c(root='../data'), input$file_database)$datapath),
+        input$psi_file_input$name
+        )
+    )
+    print(df)
+    return(df)
+  })
+
   observeEvent(input$btn_save_data, {
     if(input$file_name_save == ""){
       session$sendCustomMessage(type = 'testmessage',
@@ -286,67 +436,6 @@ server <- function(input, output, session) {
     }
   })
 
-  output$analysis_plots <- renderUI({
-    fluidRow(
-      column(
-        width = 12,
-        if(!is.null(input$psi_file_input)){
-          box(
-            width = 12,
-            fluidRow(
-              column(
-                width = 4,
-                textInput(
-                  "title_analysis_plots",
-                  "Graphic Title:"
-                )
-              ),
-              column(
-                width = 4,
-                textInput(
-                  "file_name_save",
-                  "File Name (Save):"
-                )
-              ),
-              column(
-                width = 4,
-                actionButton("btn_save_data", "Save"),
-              )
-            ),
-            fluidRow(
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_psi_pad")
-              ),
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_psi_ad_ul")
-              )
-            ),
-            fluidRow(
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_time_psi")
-              ),
-              column(
-                width = 6,
-                plotOutput("pneumatron_plot_time_ad_ul")
-              )
-            )
-          )
-          } else {
-            fluidRow(
-              column(
-                width = 12,
-                align = "center",
-                HTML("Water Pressure file is required, please attached it in <b>Analysis</b> -> <b>Filter Experiment</b> View!")
-              )
-            )
-          }
-      )
-    )
-  })
-
   # Filter Experiments View -------------------------------------------------------
   observe({
     data_ad()
@@ -373,4 +462,69 @@ server <- function(input, output, session) {
                         )
     }
   })
+
+  #---------- Manage Experiments
+  #https://stackoverflow.com/questions/57581690/combining-editable-dt-with-add-row-functionality
+  
+  experiments_table <- reactiveVal(data.table::fread(experiment_path))
+
+  observeEvent(input$table_manage_experiments_cell_edit, {
+    info <- input$table_manage_experiments_cell_edit
+    edit_row <-  info$row
+    edit_col <-  info$col + 1
+    edit_value <-  info$value
+
+    data = data.frame(experiments_table())
+    data[as.numeric(edit_row),
+         as.numeric(edit_col)] <- edit_value
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_add, {
+    new_line <- data.frame(exp_id = max(experiments_table()$exp_id) + 1,
+                           pneumatron = NA,
+                           start_datetime = NA,
+                           final_datetime = NA,
+                           finished = NA,
+                           database = NA,
+                           water_potential = NA)
+
+    data <- data.frame(experiments_table())
+
+    data[setdiff(names(new_line), names(data))] <- NA
+    new_line[setdiff(names(data), names(new_line))] <- NA
+
+    data <- rbind(data, new_line)
+
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_delete, {
+    data = experiments_table()
+    if (!is.null(input$table_manage_experiments_rows_selected)) {
+      data <- data[-as.numeric(input$table_manage_experiments_rows_selected),]
+    }
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_var_add, {
+
+    req(!input$experiment_var_name %in% c(colnames(experiments_table()), ""))
+    data <- data.frame(experiments_table())
+    data[input$experiment_var_name] <- NA
+
+    experiments_table(data)
+  })
+
+  observeEvent(input$experiment_save, {
+    data.table::fwrite(experiments_table(), experiment_path)
+  })
+
+  output$table_manage_experiments <- DT::renderDT({
+    DT::datatable(experiments_table(),
+                  rownames = FALSE,
+                  editable = TRUE)
+  })
+
+  #----------
  }

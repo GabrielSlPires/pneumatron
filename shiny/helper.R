@@ -11,6 +11,7 @@ open_pneumatron_db <- function(file_name) {
     #Pneumatron V2
     try({
       data <- data.table::fread(file_name,
+                                blank.lines.skip = TRUE,
                                 select = 1:18,
                                 col.names = c("id",
                                               "ms",
@@ -40,6 +41,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:13,
                                   col.names = c("id",
                                                 "ms",
@@ -64,6 +66,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:11,
                                   col.names = c("id",
                                                 "group",
@@ -85,6 +88,7 @@ open_pneumatron_db <- function(file_name) {
     try({
       if (open) {
         data <- data.table::fread(file_name,
+                                  blank.lines.skip = TRUE,
                                   select = 1:6,
                                   col.names = c("id",
                                                 "seq",
@@ -106,7 +110,8 @@ open_pneumatron_db <- function(file_name) {
         bkp <- data
         data <- tryCatch({
           data <- data.table::fread(file_name,
-                                  header = FALSE)
+                                    blank.lines.skip = TRUE,
+                                    header = FALSE)
           data <- data.frame(
             reshape2::colsplit(string = data$V1,
                                pattern = ",",
@@ -157,10 +162,39 @@ try.nls <- function(work.table,
     fit <- NA
     try(fit <- nls(model,
                    work.table,
-                   start = start)) #tries the nls model
+                   start = start),
+        silent = TRUE) #tries the nls model
     if (any(!is.na(fit))) break #if the model was suscesfully fit break out of the loop
   }
   return(fit) #returns nls fit. If fit was not sucesfull returns NA
+}
+
+pneumatron_p50 <- function(data) {
+  fit.pad <- try.nls(work.table =  data,
+                     model = pad ~ 100/(1 + exp(a*(psi - p50))),
+                     start.values = data.frame(parameter = c("a","p50"),
+                                               min = c(0,-10),
+                                               max = c(5,0)))
+  
+  a = summary(fit.pad)$coefficients[1]
+  p50 = summary(fit.pad)$coefficients[2]
+  p88 = log(12/88,exp(1))/a + p50
+  p12 = log(88/12,exp(1))/a + p50
+
+  p50_table <- c("a" = a,
+                 "p12" = p12,
+                 "p50" = p50,
+                 "p88" = p88)
+
+  return(p50_table)
+}
+
+pneumatron_px_proximity <- function(data, p) {
+  px = data %>% 
+    slice(which.min(abs(pad - p))) %>% 
+    select(psi) %>% 
+    as.numeric()
+  return(px)
 }
 
 initial_pressure <- function(log_line, pressure) {
@@ -196,6 +230,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                       version) 
    }, error = function(e) {
      data <- data %>% 
+       #dplyr::mutate(datetime = lubridate::dmy_hm(datetime)) %>% 
       dplyr::group_by(id,
                       measure,
                       datetime_group = lubridate::floor_date(datetime,
@@ -209,8 +244,8 @@ pneumatron_air_discharge <- function(pneumatron_data,
                          initial_pressure(log_line, pressure) + pf_s*2),
                  between(n(), 60, 120)) %>% 
     dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
-                     r_squared = summary(lm(pressure ~ log_line))$r.squared,
-                     p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
+                     #r_squared = summary(lm(pressure ~ log_line))$r.squared,
+                     #p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
                      pressure_diff = slope*(pf_s*2 - pi_s*2),
                      ad_mol = (pressure_diff*100*Vr)/(R*temp), 
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
@@ -218,7 +253,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                      datetime = min(datetime),
                      .groups = "drop") %>% 
-    dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
+    #dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
@@ -284,4 +319,32 @@ validate_data_psi <-function(file) {
   validation <- any(colnames(df) %in% c("id", "time", "pot")) #check col names
 
   return(validation)
+}
+
+filter_data_by_experiment <- function(d, e, experiment_finished = FALSE) {
+  
+  e$finished <- as.logical(e$finished)
+  if (any(is.na(e$finished))) stop("Finished column in experiment with non logical format")
+  
+  e <- e %>% 
+    dplyr::filter(finished == experiment_finished) %>% 
+    dplyr::select(id, s = start_datetime, f = final_datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  d <- d %>% 
+    dplyr::select(id, datetime) %>% 
+    dplyr::mutate(dplyr::across(.fns = as.numeric))
+  
+  filter <- apply(e, 1, function(x) d$id == x["id"] & d$datetime >= x["s"] & d$datetime <= x["f"])
+  
+  result <- if (experiment_finished) apply(filter, 1, any) else apply(!filter, 1, all)
+  
+  # Return the filtered data
+  return(data[result])
+}
+
+open_data_psi <- function(file_path) {
+  df <- data.table::fread(file_path, fill = TRUE)
+  df$time <- lubridate::dmy_hm(df$time)
+  df <- dplyr::filter(df, !is.na(id))
+  return(df)
 }

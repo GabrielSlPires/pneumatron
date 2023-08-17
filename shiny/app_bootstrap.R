@@ -1,1 +1,1 @@
-shiny::runApp()
+shiny::runApp(port = 7036, launch.browser = TRUE)

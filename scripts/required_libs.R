@@ -1,10 +1,13 @@
 packages <- c(
+    "Cairo",
     "data.table",
     "dplyr",
+    "DT",
     "ggplot2",
     "gridExtra",
     "lubridate",
     "plotly",
+    "RColorBrewer",
     "reshape2",
     "rstudioapi",
     "serial",
