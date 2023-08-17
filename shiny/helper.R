@@ -165,7 +165,7 @@ try.nls <- function(work.table,
 
 initial_pressure <- function(log_line, pressure) {
   tryCatch({
-    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure))])
+    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure, na.rm = TRUE))], na.rm = TRUE)
   },
   error = function(e) init <- 3,
   warning = function(w) init <- 3)
