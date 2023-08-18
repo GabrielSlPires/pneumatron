@@ -444,7 +444,8 @@ server <- function(input, output, session) {
   #---------- Manage Experiments
   #https://stackoverflow.com/questions/57581690/combining-editable-dt-with-add-row-functionality
   
-  experiments_table <- reactiveVal(data.table::fread(experiment_path))
+  #disable to release
+  #experiments_table <- reactiveVal(data.table::fread(experiment_path))
 
   observeEvent(input$table_manage_experiments_cell_edit, {
     info <- input$table_manage_experiments_cell_edit
