@@ -185,7 +185,7 @@ body <- dashboardBody(
                   )
                 ),
                 column(
-                  width = 8,
+                  width = 10, #8,
                   align = "center",
                   sliderInput("filter_experiment_datetime",
                               label = "Time range",
@@ -196,12 +196,12 @@ body <- dashboardBody(
                               step = 1,
                               width = "90%"
                   )
-                ),
-                column(
-                  width = 2,
-                  align = "center",
-                  h4("Save Experiment"),
-                  actionButton("send_to_experiment_table", "Save")
+                #),
+                #column(
+                #  width = 2,
+                #  align = "center",
+                #  h4("Save Experiment"),
+                #  actionButton("send_to_experiment_table", "Save")
                 )
               )
             )
