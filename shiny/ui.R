@@ -51,20 +51,44 @@ body <- dashboardBody(
         databases_tab,
         tabItem(
           tabName = "measure_diagnostics",
-          #plot last day only
           fluidRow(
             column(
-              width = 4,
-              dateInput(
-                "diagnostics_initial_date",
-                "Initial date for Measure Diagnostic"
-              ),
-            ),
-            column(
-              width = 8,
-              p("To calculate air discharged for each measurements we use the difference between log line 3 to 30 (vertical lines)"),
-              p("Each measure has 120 log line points, because Pneumatron reads pressure every 500ms.")
+              width = 12,
+              h3("Measurements Diagnostic")
             )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              box( 
+                title = "Instructions",
+                width = 12,
+                status = "primary",
+                collapsible = TRUE,
+                collapsed = TRUE,
+                fluidRow(
+                  style = "text-align: justify; text-justify: inter-word;",
+                  column(
+                    width = 6,
+                    HTML("In this chart, it is possible to diagnose your pneumatron measurements. Measures are identified by colors ranging from <b>oldest (blue)</b> to <b>newest (red)</b>. Within a measurement, <b>pressure (Y-axis)</b> is logged every 500ms, so each measure has 120 <b>log lines (X-axis)</b>.<br>"),
+                    HTML("A pneumatron measurement consists of applying a partial vacuum to the cut-open vessels and then tracking pressure difference to calculate air discharge. To do this, only the pressure difference from log lines <b>3 to 30 (grey area)</b> is used. Thus, <b>if a pressure drop happens in this region during a measure, this one will be automatically discarted</b>. If all measurements of a pneumatron were discarded, <b>this device will not appear in the 'Running Experiments' tab</b>."),
+                  ),
+                  column(
+                    width = 6,
+                    HTML("Pressure drops happen every time the vacuum pump is activated. Thereby, if you have <b>pressure drops</b> on the first day of new branch measurements, it could be a <b>leakage indicator</b>. In this case, try to use <b>stronger clamps, thinner tube adapters, and glue</b>. It is common to have pressure drops outside the grey region in the final days of your experiment.<br>"),
+                    HTML("To increase visibility, the first pressure log is not shown, because it's close to atmospheric pressure.<br>"),
+                    HTML("Please, select the range you want to inspect. It will be automatically displayed only the <b>newest availabe day</b>. Note that those plots could take a while to display.")
+                  ),
+                ),
+              )
+            )
+          ),
+          fluidRow(
+            column(
+              width = 3,
+              dateRangeInput("diagnostics_range_date",
+                                label = 'Date range:'),
+            ),
           ),
           fluidRow(
             column(
@@ -72,7 +96,7 @@ body <- dashboardBody(
               shiny_busy(),
               plotOutput(
                 "plot_measure_diagnostic",
-                height = "75vh"
+                #height = "75vh"
               )
             )
           )
@@ -159,15 +183,27 @@ body <- dashboardBody(
           fluidRow(
             column(
               width = 12,
-              align = "center",
-              h3("Running Experiment"),
+              h3("Running Experiment",
+                 width = 3,
+                 style = "text-align: center;"),
+            ),
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              HTML("<br>"),
               shiny_busy(),
-              HTML("<br>")
             )
           ),
           fluidRow(
               uiOutput("pneumatron_plots")
-          )
+          ),
+          fluidRow(
+            column(
+              width = 12,
+              HTML("If a pneumatron that you are using is not appering here, please check <b>Measure Diagnostics</b> tab."),
+            )
+          ),
         ), # end Running Views
 
         tabItem(

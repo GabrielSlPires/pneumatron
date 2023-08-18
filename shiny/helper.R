@@ -253,8 +253,8 @@ pneumatron_air_discharge <- function(pneumatron_data,
                          initial_pressure(log_line, pressure) + pf_s*2),
                  between(n(), 60, 120)) %>% 
     dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
-                     #r_squared = summary(lm(pressure ~ log_line))$r.squared,
-                     #p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
+                     r_squared = summary(lm(pressure ~ log_line))$r.squared,
+                     p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
                      pressure_diff = slope*(pf_s*2 - pi_s*2),
                      ad_mol = (pressure_diff*100*Vr)/(R*temp), 
                      ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
@@ -262,7 +262,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                      datetime = min(datetime),
                      .groups = "drop") %>% 
-    #dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
+    dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()

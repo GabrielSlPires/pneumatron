@@ -207,18 +207,41 @@ server <- function(input, output, session) {
 
 
   #------------- Measure Diagnostic
+  observe({
+    data_raw()
+
+    date_max = max(data_raw()$datetime)
+    date_min = min(data_raw()$datetime)
+
+    updateDateRangeInput(session,
+                         inputId = "diagnostics_range_date",
+                         label = 'Date range:',
+                         start = date_max,
+                         end = date_max,
+                         min = date_min,
+                         max = date_max)
+  })
+
   output$plot_measure_diagnostic <- renderPlot({
     req(data_raw())
-    req(input$diagnostics_initial_date)
-    data_raw() %>% 
-      filter(datetime >= lubridate::ymd(input$diagnostics_initial_date) |
-             datetime >= lubridate::as_date(max(datetime)),
+    req(input$diagnostics_range_date)
+    
+    data <- tryCatch({
+      mutate(data_raw(), unique_var = paste(measure, group))
+    }, error = function(e) {
+      mutate(data_raw(), unique_var = measure)
+    })
+    
+    data %>% 
+      filter(datetime >= lubridate::ymd(input$diagnostics_range_date[1]),
+             datetime <= lubridate::ymd(input$diagnostics_range_date[2]) + 1,
              pressure < 85) %>% 
       group_by(id) %>% 
       ggplot(aes(log_line,
                  pressure,
                  color = datetime,
-                 group = paste(measure, group))) +
+                 group = unique_var)) +
+      geom_rect(aes(xmin = 3, xmax = 30, ymax = Inf, ymin = -Inf), color = "grey70") +
       geom_line() +
       geom_vline(aes(xintercept = 3)) +
       geom_vline(aes(xintercept = 30)) +
@@ -226,7 +249,9 @@ server <- function(input, output, session) {
       ylab("Pressure (kPa)") +
       xlab("log line") +
       ggtitle("Pressure difference inside each measurement by Pneumatron") +
-      theme_bw()
+      theme_bw() +
+      scale_color_datetime(low = "blue", high = "red")
+      
   })
   #-------------
 
