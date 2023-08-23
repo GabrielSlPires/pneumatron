@@ -120,6 +120,7 @@ server <- function(input, output, session) {
           req(data_psi())
           psi <- dplyr::filter(data_psi(),
                                id == my_i)
+          if (nrow(psi) == 0) stop("No water pressure data for this measurement")
           psi_point <- list(
             geom_vline(data = psi,
                        aes(xintercept = as.numeric(time)),
