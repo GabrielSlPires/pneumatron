@@ -278,10 +278,19 @@ body <- dashboardBody(
             box(
               title = "Vulnerability Curve Paramenters",
               width = 6,
-              column(
-                width = 12,
-                h3("Parameters Table"),
-                tableOutput("filter_view_p50_table")
+              fluidRow(
+                column(
+                  width = 12,
+                  HTML("<b>estimated</b> = Water pressure value it's aquired fitting the Pammenter and Willigen equation.<br>"),
+                  HTML("<b>measure</b> = Water pressure value it's aquired due to pneumatron hight resolution, whitout fitting a curve.")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 12,
+                  h4("Parameters Table"),
+                  tableOutput("filter_view_p50_table")
+                )
               )
             )
           )
