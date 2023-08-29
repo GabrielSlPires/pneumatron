@@ -1,6 +1,8 @@
+source("lib/calculate_air_discharge.R")
+
 get_pneumatron_ad <- function(file_name) { #não estou mais usando isso
     data <- open_pneumatron_db(file_name)
-    data <- pneumatron_air_discharge(data)
+    data <- calculate_air_discharge(data)
 
     return(data)
 }
@@ -195,78 +197,6 @@ pneumatron_px_proximity <- function(data, p) {
     select(psi) %>% 
     as.numeric()
   return(px)
-}
-
-initial_pressure <- function(log_line, pressure) {
-  tryCatch({
-    init <- max(log_line[which(log_line < 6)][which(pressure == min(pressure, na.rm = TRUE))], na.rm = TRUE)
-  },
-  error = function(e) init <- 3,
-  warning = function(w) init <- 3)
-}
-
-pneumatron_air_discharge <- function(pneumatron_data,
-                                     pi_s = 1.5, #initial pressure time
-                                     pf_s = 15, #final pressure time
-                                     reservoir = 2.6, #tubing volume (in mL)
-                                     p_atm = 101.3, #atmospheric pressure (in kPa)
-                                     R = 8.3144621,
-                                     temp = 293.15) {
-  library(dplyr)
-
-
-  #data.table: The data.table package offers fast grouping operations and other data manipulation functions. It is designed to be efficient for large datasets and can handle millions of rows very quickly.
-
-#sqldf: The sqldf package allows you to manipulate data frames using SQL statements. It can be a good option for complex queries involving multiple tables.
-
-#dtplyr: The dtplyr package provides a dplyr interface to data.tables, allowing you to use familiar dplyr syntax while taking advantage of the speed of data.tables.
-
-#multidplyr: The multidplyr package allows you to distribute dplyr operations across multiple cores or machines, making it possible to handle large datasets more efficiently.
-  
-  Vr = reservoir*10^-6
-  #calculate air discharged (AD) in mols, uL, and the percentage of air discharged (PAD) and concentration per m^3 at the final pressure 
-  
-  data <- pneumatron_data %>%
-    dplyr::filter(pressure != "NaN",
-                  !is.na(id)) 
-
-  data <- tryCatch({ #separete measures and plants
-    data <- data %>% 
-      dplyr::group_by(id,
-                      measure,
-                      group,
-                      day = lubridate::day(datetime),
-                      version) 
-   }, error = function(e) {
-     data <- data %>% 
-       #dplyr::mutate(datetime = lubridate::dmy_hm(datetime)) %>% 
-      dplyr::group_by(id,
-                      measure,
-                      datetime_group = lubridate::floor_date(datetime,
-                                                       unit = "hour")
-                      )
-   })
-   
-   data <- data %>% 
-   dplyr::filter(between(log_line,
-                         initial_pressure(log_line, pressure) + 1,
-                         initial_pressure(log_line, pressure) + pf_s*2),
-                 between(n(), 60, 120)) %>% 
-    dplyr::summarise(slope = lm(pressure ~ log_line)$coefficients[[2]],
-                     r_squared = summary(lm(pressure ~ log_line))$r.squared,
-                     p_value = summary(lm(pressure ~ log_line))$coefficients[,4][[2]],
-                     pressure_diff = slope*(pf_s*2 - pi_s*2),
-                     ad_mol = (pressure_diff*100*Vr)/(R*temp), 
-                     ad_ul = (ad_mol*R*temp/(p_atm*100))*1000*1000*1000,
-                     c = (pressure_diff)/(R*temp),
-                     n_mol = (p_atm*1000*Vr)/(R*temp),
-                     datetime = min(datetime),
-                     .groups = "drop") %>% 
-    dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
-    dplyr::group_by(id) %>% 
-    dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
-    dplyr::ungroup()
-  return(data)
 }
 
 extrapolated_wp <- function(pneumatron, #pneumatron data file

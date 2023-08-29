@@ -2,6 +2,7 @@ options(shiny.maxRequestSize = 300*1024^2)
 
 suppressPackageStartupMessages(library(shiny))
 suppressPackageStartupMessages(library(lubridate))
+suppressPackageStartupMessages(library(data.table))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(plotly))
@@ -70,7 +71,7 @@ server <- function(input, output, session) {
     req(data_raw())
     req(!input$calculate_air_discharge)
     data_ad <- tryCatch({
-      data <- pneumatron_air_discharge(data_raw())
+      data <- calculate_air_discharge(data_raw())
       output$calculate_data_ad <- renderUI(HTML("Pneumatron Air Discharged is ready!"))
       return(data)
     }, error = function(e){

@@ -36,7 +36,7 @@ while (TRUE) {
                       .groups = "drop") %>% 
             arrange(id, speed) %>% 
             as.data.frame())
-    pneumatron_air_discharge(data)
+    calculate_air_discharge(data)
     
   })
   Sys.sleep(5)
