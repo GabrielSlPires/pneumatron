@@ -7,6 +7,7 @@ packages <- c(
     "gridExtra",
     "lubridate",
     "plotly",
+    "purrr",
     "RColorBrewer",
     "reshape2",
     "rstudioapi",

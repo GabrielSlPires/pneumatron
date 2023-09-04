@@ -8,7 +8,6 @@ sapply(list.files("ui/",
                   full.names = TRUE),
        source)
 
-
 sidebar <- dashboardSidebar(
   sidebarMenu(
     id = "tabs",
@@ -196,7 +195,7 @@ body <- dashboardBody(
             )
           ),
           fluidRow(
-              uiOutput("pneumatron_plots")
+            running_exp_UI("running_experiments")
           ),
           fluidRow(
             column(

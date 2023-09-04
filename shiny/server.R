@@ -84,67 +84,7 @@ server <- function(input, output, session) {
     })
   })
 
-  #create plots (running experiments) for each different device in ui
-  output$pneumatron_plots <- renderUI({
-
-    plot_output_list <- lapply(unique(data_ad()$id), function(i) {
-      boxname <- paste("Pneumatron ID:", i)
-      date_range_name <- paste0("date_range_running_p", i)
-      plotname <- paste0("pneumatron_plot_p", i)
-      date_min = min(data_ad()[data_ad()$id == i,]$datetime)
-      date_max = max(data_ad()[data_ad()$id == i,]$datetime)
-      column(width = 4,
-             box(title = boxname,
-                 collapsible = TRUE,
-                 status = "primary",
-                 width = 12,
-                 dateRangeInput(date_range_name,
-                                label = 'Date range:',
-                                start = date_min,
-                                end = date_max,
-                                min = date_min,
-                                max = date_max),
-                 plotlyOutput(plotname)))
-    })
-    do.call(tagList, plot_output_list)
-  })
-
-  #render each plot (running experiments)
-  for (i in 1:100) {
-    local({
-      my_i <- i
-      plotname <- paste0("pneumatron_plot_p", my_i)
-      output[[plotname]] <- renderPlotly({
-        datetime_filter <- input[[paste0("date_range_running_p", my_i)]]
-        psi_point <- list()
-        try({
-          req(data_psi())
-          psi <- dplyr::filter(data_psi(),
-                               id == my_i)
-          if (nrow(psi) == 0) stop("No water pressure data for this measurement")
-          psi_point <- list(
-            geom_vline(data = psi,
-                       aes(xintercept = as.numeric(time)),
-                       alpha = 0.5)
-          )
-        }, silent = TRUE)
-
-        p <- ggplot(data_ad() %>%
-                 filter(
-                  id == my_i,
-                  datetime >= datetime_filter[1],
-                  datetime <= datetime_filter[2] + 1
-                 ),
-               aes(datetime, ad_ul)) +
-          geom_point() +
-          psi_point +
-          scale_x_datetime(date_labels = "%b %d") +
-          ylab("Air Discharge (ul)") +
-          theme_bw()
-        ggplotly(p)
-      })
-    })
-  }
+  running_exp_Server("running_experiments", data_ad)
 
   output$psi_plot_filter_view <- renderPlotly({
       req(data_psi())
