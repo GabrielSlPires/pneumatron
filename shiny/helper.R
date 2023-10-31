@@ -262,7 +262,7 @@ pneumatron_air_discharge <- function(pneumatron_data,
                      n_mol = (p_atm*1000*Vr)/(R*temp),
                      datetime = min(datetime),
                      .groups = "drop") %>% 
-    dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
+    #dplyr::filter(r_squared >= 0.85, p_value <= 0.01) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100) %>% 
     dplyr::ungroup()
