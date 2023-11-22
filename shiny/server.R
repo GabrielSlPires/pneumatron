@@ -87,18 +87,25 @@ server <- function(input, output, session) {
   running_exp_Server("running_experiments", data_ad, data_psi)
 
   output$psi_plot_filter_view <- renderPlotly({
-      req(data_psi())
-      datetime_filter <- input$filter_experiment_datetime
-      
+    req(data_psi())
+    datetime_filter <- input$filter_experiment_datetime
 
-      p <- ggplot(dplyr::filter(data_psi(),
-                                id == input$pneumatron_id,
-                                time >= datetime_filter[1] - as.difftime(1, unit="days"),
-                                time <= datetime_filter[2],),
-      aes(time, pot, group = 1)) +
-        geom_line() +
-        theme_bw()
-      ggplotly(p)
+    p <- ggplot(dplyr::filter(data_psi(), id == input$pneumatron_id),
+                aes(time, pot, group = 1)) +
+      geom_rect(aes(x = NULL,
+                    y = NULL,
+                    xmin = datetime_filter[1] - as.difftime(1, unit = "days"),
+                    xmax = datetime_filter[2]),
+                fill = "grey70",
+                ymin = -10,
+                ymax = 1,
+                colour = "white",
+                size = 0.5,
+                alpha = 0.2) +
+      geom_point() +
+      geom_line() +
+      theme_bw()
+    ggplotly(p)
   })
 
   output$psi_plot_databases_view <- renderPlotly({
