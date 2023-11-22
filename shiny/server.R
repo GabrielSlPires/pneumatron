@@ -139,7 +139,7 @@ server <- function(input, output, session) {
     req(input$psi_file_input)
     df <- tryCatch(
       {
-        if(!validate_data_psi(input$psi_file_input$datapath)) stop()
+        if (!validate_data_psi(input$psi_file_input$datapath)) stop()
         df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
         df$time <- lubridate::dmy_hm(df$time)
         df <- dplyr::filter(df, !is.na(id))
@@ -403,7 +403,7 @@ server <- function(input, output, session) {
     data_ad()
     updateSelectInput(session,
                       inputId = "pneumatron_id",
-                      choices = unique(data_ad()$id)
+                      choices = sort(unique(data_ad()$id))
                       )
   })
 
