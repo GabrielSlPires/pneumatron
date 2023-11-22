@@ -311,6 +311,7 @@ body <- dashboardBody(
                 title = "Plot Customization",
                 width = 6,
                 collapsible = TRUE,
+                collapsed = TRUE,
                 column(
                   width = 6,
                   fluidRow(
