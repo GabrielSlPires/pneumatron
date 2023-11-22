@@ -105,7 +105,7 @@ server <- function(input, output, session) {
       req(data_psi())
       #Dinamically change color pallete n()
       colourCount = length(unique(data_psi()$id))
-      getPalette = colorRampPalette(brewer.pal(12, "Paired"))
+      getPalette = colorRampPalette(brewer.pal(7, "Set1"))
 
       p <- ggplot(na.omit(data_psi()),
       aes(time, pot, group = factor(id), color = factor(id))) +
