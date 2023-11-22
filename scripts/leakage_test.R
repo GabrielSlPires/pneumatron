@@ -30,7 +30,7 @@ while (TRUE) {
     #print(p)
 
     print(data %>% 
-            group_by(id, group) %>% 
+            filter(log_line > 2) %>% 
             summarize(`pressure diff [kPa]` = max(pressure) - min(pressure),
                       speed = round(`pressure diff [kPa]`/n(), 3),
                       .groups = "drop") %>% 
