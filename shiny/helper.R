@@ -1,5 +1,3 @@
-source("lib/calculate_air_discharge.R")
-
 get_pneumatron_ad <- function(file_name) { #não estou mais usando isso
     data <- open_pneumatron_db(file_name)
     data <- calculate_air_discharge(data)
