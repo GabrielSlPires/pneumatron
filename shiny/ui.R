@@ -310,6 +310,7 @@ body <- dashboardBody(
               box(
                 title = "Plot Customization",
                 width = 6,
+                collapsible = TRUE,
                 column(
                   width = 6,
                   fluidRow(
