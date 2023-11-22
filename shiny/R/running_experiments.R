@@ -24,7 +24,7 @@ pneumatron_box_ui <- function(id, pneumatron, data_ad) {
 }
 
 # create server for one pneumatron box
-pneumatron_box_server <- function(id, pneumatron, data_ad) {
+pneumatron_box_server <- function(id, pneumatron, data_ad, data_psi) {
   stopifnot(is.reactive(data_ad))
   
   moduleServer(id, function(input, output, session) {
@@ -32,7 +32,7 @@ pneumatron_box_server <- function(id, pneumatron, data_ad) {
     output$running_plotly <- renderPlotly({
       datetime_filter <- input$running_date_range
 
-      p <- ggplot(data_ad() %>%
+            p <- ggplot(data_ad() %>%
                     filter(
                       id == pneumatron,
                       datetime >= datetime_filter[1],
@@ -43,6 +43,18 @@ pneumatron_box_server <- function(id, pneumatron, data_ad) {
         scale_x_datetime(date_labels = "%b %d") +
         ylab("Air Discharge (ul)") +
         theme_bw()
+      # add vertical lines for water potential measures
+      try({
+        req(data_psi())
+        psi <- dplyr::filter(data_psi(),
+                             id == pneumatron)
+        if (nrow(psi) == 0) stop("No water pressure data for this measurement")
+        p <- p +
+          geom_vline(data = psi,
+                     aes(xintercept = as.numeric(time)),
+                     alpha = 0.5)
+      }, silent = TRUE)
+      
       ggplotly(p)
     })
   })
@@ -54,7 +66,7 @@ running_exp_UI <- function(id) {
 }
 
 # create server for all pneumatron boxes
-running_exp_Server <- function(id, data_ad) {
+running_exp_Server <- function(id, data_ad, data_psi) {
   req(data_ad)
   stopifnot(is.reactive(data_ad))
   
@@ -72,7 +84,7 @@ running_exp_Server <- function(id, data_ad) {
     # create server for each pneumatron box
     observeEvent(pneumatrons(), {
       map(pneumatrons(), function(pneumatron) {
-        pneumatron_box_server(pneumatron, pneumatron, data_ad)
+        pneumatron_box_server(pneumatron, pneumatron, data_ad, data_psi)
       })
     })
     

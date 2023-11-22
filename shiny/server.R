@@ -84,7 +84,7 @@ server <- function(input, output, session) {
     })
   })
 
-  running_exp_Server("running_experiments", data_ad)
+  running_exp_Server("running_experiments", data_ad, data_psi)
 
   output$psi_plot_filter_view <- renderPlotly({
       req(data_psi())
