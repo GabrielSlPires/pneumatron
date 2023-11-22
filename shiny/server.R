@@ -232,13 +232,13 @@ server <- function(input, output, session) {
              datetime <= datetime_filter[2],
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
-    if(!is.null(input$psi_file_input)){
+    if (!is.null(input$psi_file_input)) {
       psi <- dplyr::filter(data_psi(),
                            id == input$pneumatron_id,
-                           time >= datetime_filter[1] - as.difftime(1, unit="days"),
+                           time >= datetime_filter[1] - as.difftime(1, unit = "days"),
                            time <= datetime_filter[2],
                            !is.na(pot))
-      data <- extrapolated_wp(data, psi)
+      try(data <- extrapolated_wp(data, psi))
     }
     return(data)
   })
@@ -311,10 +311,15 @@ server <- function(input, output, session) {
   })
 
   output$pneumatron_filter_psi_ad_ul <- renderPlotly({
-    p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
-      geom_point() +
-      theme_bw()
-    ggplotly(p)
+    tryCatch({
+      p <- ggplot(data_ad_experiment_filter(), aes(psi, ad_ul)) +
+        geom_point() +
+        theme_bw()
+      ggplotly(p)
+    },
+    error = function(c) {
+      stop("Water Potential file is missing, or points for more than one curve are filtered.")
+    })
   })
   output$pneumatron_plot_psi_ad_ul <- renderPlot(plot_psi_ad_ul())
   plot_psi_ad_ul <- reactive({
@@ -328,10 +333,15 @@ server <- function(input, output, session) {
   })
 
   output$pneumatron_filter_time_psi <- renderPlotly({
-    p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
-      geom_point() +
-      theme_bw()
-    ggplotly(p)
+    tryCatch({
+      p <- ggplot(data_ad_experiment_filter(), aes(datetime, psi)) +
+        geom_point() +
+        theme_bw()
+      ggplotly(p)
+    },
+    error = function(c) {
+      stop("Water Potential file is missing, or points for more than one curve are filtered.")
+    })
   })
   output$pneumatron_plot_time_psi <- renderPlot(plot_time_psi())
   plot_time_psi <- reactive({
