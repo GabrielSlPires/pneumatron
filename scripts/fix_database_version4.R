@@ -1,18 +1,22 @@
-library("googledrive")
-drive_download(
-  as_id("1MJxkGqGkaaNUOa1yGP0Tt4etdVHzex1M"),
-  path = "data/IAC/data_iac/pneumatron_database-v4.csv",
-  overwrite = TRUE
-)
+#library("googledrive")
+#drive_download(
+#  as_id("1MJxkGqGkaaNUOa1yGP0Tt4etdVHzex1M"),
+#  path = "data/IAC/data_iac/pneumatron_database-v4.csv",
+#  overwrite = TRUE
+#)
 
-#File received from git to be cleaned
+
+# primeiro troca os nomes dos arquivos
+# depois aperta:
+# Ctrl + Shift + S
+
+
+#File received  to be cleaned
 file_name <- "data/IAC/data_iac/pneumatron_database-v4.csv"
-#file_name <- "data/iotree_unicamp/pneumatron_database.csv"
-#file_name <- "data/IAC/finalizado/pneumatron_database-03-06.csv"
+
 #File to save removed measures
 file_trash <- "data/IAC/data_iac/trash.csv"
-#file_trash <- "data/iotree_unicamp/trash.csv"
-#file_trash <- "data/IAC/finalizado/trash.csv"
+
 
 message("\nStarting to update database with new data from googledrive...\n")
 message("New data from git: ", file_name)
