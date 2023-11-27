@@ -50,7 +50,7 @@ prepare_data_for_air_discharge <- function(data, pf_s) {
   if ("group" %in% colnames(data)) {
     data_prepared <- data[,
                           .(
-                            datetime = min(datetime),
+                            datetime = first(datetime),
                             n = .N,
                             pi = pressure[which.min(abs(log_line - (get_initial_pressure(log_line, pressure) + 1)))],
                             pf = pressure[which.min(abs(log_line - (get_initial_pressure(log_line, pressure) + pf_s*2)))]
@@ -63,7 +63,7 @@ prepare_data_for_air_discharge <- function(data, pf_s) {
   } else {
     data_prepared <- data[,
                           .(
-                            datetime = min(datetime),
+                            datetime = first(datetime),
                             n = .N,
                             pi = pressure[which.min(abs(log_line - (get_initial_pressure(log_line, pressure) + 1)))],
                             pf = pressure[which.min(abs(log_line - (get_initial_pressure(log_line, pressure) + pf_s*2)))]

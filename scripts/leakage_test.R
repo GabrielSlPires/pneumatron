@@ -2,7 +2,7 @@ source("shiny/helper.R")
 library(ggplot2)
 library(dplyr)
     
-while (TRUE) {
+while (TRUE) { # rodar nessa linha
   try({
     #data <- filter(open_pneumatron_db("data/raw_pneumatron/leak_test_03-15.csv"))
     
@@ -30,9 +30,9 @@ while (TRUE) {
     #print(p)
 
     print(data %>% 
-            filter(log_line > 2) %>% 
-            summarize(`pressure diff [kPa]` = max(pressure) - min(pressure),
-                      speed = round(`pressure diff [kPa]`/n(), 3),
+            filter(log_line > 2) %>% # se tiver valor estranho, aumenta pra 3, ou 4
+            summarize(`pressure diff [kPa]` = max(pressure) - min(pressure), # 3 kPa max
+                      speed = round(`pressure diff [kPa]`/n(), 3), # 0.02 max
                       .groups = "drop") %>% 
             arrange(id, speed) %>% 
             as.data.frame())
