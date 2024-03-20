@@ -11,6 +11,18 @@ With this dashboard, you will be able to track currently running curves and anal
 ### Required
 The user needs to have [Arduino IDE](https://www.arduino.cc/en/software), [R](https://cran.r-project.org/bin/windows/base/) and [R Studio](https://www.rstudio.com/products/rstudio/download/) installed.
 
+#### Setting up ESP8266 on Arduino IDE
+
+In order for your computer to read the ESP8266 through a communication port, it is necessary to install the ESP8266 board in the Arduino IDE. Here are the steps to do this:
+
+1. Open the Arduino IDE.
+2. Go to File > Preferences.
+3. In the "Additional Board Manager URLs" field, enter the following JSON link: `http://arduino.esp8266.com/stable/package_esp8266com_index.json`.
+4. Click OK to save your changes and return to the main screen.
+5. Now go to Tools > Board > Board Manager.
+6. Look for the option "esp8266 by ESP8266 Community" and click the Install button.
+7. After the installation, your computer will automatically create a communication port for ESP8266 boards.
+
 ### Steps
 
 1. Clone/Download this repository to your local machine.
