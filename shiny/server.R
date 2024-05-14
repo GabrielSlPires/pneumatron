@@ -142,7 +142,8 @@ server <- function(input, output, session) {
         if (!validate_data_psi(input$psi_file_input$datapath)) stop()
         df <- data.table::fread(input$psi_file_input$datapath, fill = TRUE)
         df$time <- lubridate::dmy_hm(df$time)
-        df <- dplyr::filter(df, !is.na(id))
+        df <- dplyr::select(df, id, time, pot)
+        df <- na.omit(df)
 
         output$open_data_psi <- renderText("Table is ready!")
         return(df)
@@ -234,17 +235,19 @@ server <- function(input, output, session) {
 
   data_ad_experiment_filter <- reactive({
     datetime_filter <- input$filter_experiment_datetime
+    gas_discharge_filter <- input$filter_experiment_gas_discharge
     data <- data_ad() %>%
       filter(datetime >= datetime_filter[1],
              datetime <= datetime_filter[2],
+             ad_ul >= gas_discharge_filter[1],
+             ad_ul <= gas_discharge_filter[2],
              id == input$pneumatron_id) %>%
       mutate(pad = ((ad_ul - min(ad_ul))/(max(ad_ul) - min(ad_ul)))*100)
     if (!is.null(input$psi_file_input)) {
       psi <- dplyr::filter(data_psi(),
                            id == input$pneumatron_id,
                            time >= datetime_filter[1] - as.difftime(1, unit = "days"),
-                           time <= datetime_filter[2],
-                           !is.na(pot))
+                           time <= datetime_filter[2])
       try(data <- extrapolated_wp(data, psi))
     }
     return(data)
@@ -411,16 +414,25 @@ server <- function(input, output, session) {
     if (input$pneumatron_id != 0) {
       data <- data_ad() %>% 
         dplyr::filter(id == input$pneumatron_id) %>%
-        dplyr::select(datetime) %>% 
-        unique()
+        dplyr::select(datetime, ad_ul)
+
       date_min = min(data$datetime)
       date_max = max(data$datetime)
+      gas_max = round(max(data$ad_ul), 0) + 1
+      gas_min = round(min(data$ad_ul), 0) - 1
       updateSliderInput(session,
                         inputId = "filter_experiment_datetime",
                         min = date_min,
                         max = date_max,
                         value = c(date_min,
                                   date_max)
+                        )
+      updateSliderInput(session,
+                        inputId = "filter_experiment_gas_discharge",
+                        min = gas_min,
+                        max = gas_max,
+                        value = c(gas_min,
+                                  gas_max)
                         )
     }
   })

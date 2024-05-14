@@ -222,12 +222,11 @@ body <- dashboardBody(
                 column(
                   width = 10, #8,
                   align = "center",
-                  sliderInput("filter_experiment_datetime",
-                              label = "Time range",
+                  sliderInput("filter_experiment_gas_discharge",
+                              label = "Gas Discharge",
                               min = 0,
                               max = 0,
                               value = c(0,0),
-                              timeFormat = "%F %H:%M",
                               step = 1,
                               width = "90%"
                   )
@@ -237,6 +236,21 @@ body <- dashboardBody(
                 #  align = "center",
                 #  h4("Save Experiment"),
                 #  actionButton("send_to_experiment_table", "Save")
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 12, #8,
+                  align = "center",
+                  sliderInput("filter_experiment_datetime",
+                              label = "Time range",
+                              min = 0,
+                              max = 0,
+                              value = c(0,0),
+                              timeFormat = "%F %H:%M",
+                              step = 1,
+                              width = "90%"
+                  )
                 )
               )
             )
