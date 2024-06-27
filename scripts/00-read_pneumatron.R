@@ -1,5 +1,3 @@
-require(serial, quietly = TRUE)
-
 for (reciver in reciver_serial_port) {
   message("Reading Pneumatron from port: ",
           reciver,
@@ -13,11 +11,11 @@ message("Saving data to file: ",
 #Create a list of COM ports
 con <- list()
 for (reciver in reciver_serial_port) {
-  con[[match(reciver, reciver_serial_port)]] <- serialConnection(
+  con[[match(reciver, reciver_serial_port)]] <- serial::serialConnection(
     port = reciver,
     mode = "115200,n,8,1",
     newline = 1,
-    translation = "crlf")
+    translation = "auto")
 }
 
 #close all COM ports to avoid errors
@@ -38,17 +36,18 @@ while (1) {
     message("\rReading Pneumatron...", appendLF = FALSE)
     Sys.sleep(0.2)
     tryCatch({
-      serial_messages <- read.serialConnection(con[[match(reciver, reciver_serial_port)]])
-      if (serial_messages != "") {
+      buffer <- serial::nBytesInQueue(con[[match(reciver, reciver_serial_port)]])
+      while (buffer[1] > 0) {
+        read_serial <- paste("gets ${sdev_", reciver_serial_port, "}", sep = "")
+        serial_message <- tcltk::tclvalue(tcltk::.Tcl(read_serial))
+        if (serial_message == "") break
         time <- Sys.time()
-        serial_messages <- unlist(strsplit(serial_messages, "\n"))
-        for (split_message in serial_messages) {
-          line <- paste(split_message, lubridate::ymd_hms(time), sep = ",")
-          write(line,
-                file = paste0("../data/raw_pneumatron/", file_name, ".csv"),
-                append = TRUE)
-        }
+        line <- paste(serial_message, lubridate::ymd_hms(time), sep = ",")
+        write(line,
+              file = paste0("data/raw_pneumatron/", file_name, ".csv"),
+              append = TRUE)
+        buffer <- serial::nBytesInQueue(con[[match(reciver, reciver_serial_port)]])
       }
-    }, error = function(e){})
+    }, error = function(e){message(e)})
   }
 }
