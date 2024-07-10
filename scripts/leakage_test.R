@@ -15,6 +15,7 @@ ggplot(data %>%
   geom_vline(aes(xintercept = 3)) +
   geom_vline(aes(xintercept = 30)) +
   facet_wrap(~id, scales = "free") +
+  scale_color_datetime(low = "deepskyblue", high = "tomato") +
   ylab("Pressure (kPa)") +
   xlab("log line") +
   ggtitle("Pressure difference inside each measurement by Pneumatron") +
