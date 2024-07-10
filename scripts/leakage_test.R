@@ -2,10 +2,10 @@ source("shiny/helper.R")
 library(ggplot2)
 library(dplyr)
 
-data <- open_pneumatron_db("https://raw.githubusercontent.com/GabrielSlPires/pneumatron_workshop_2024_03/main/pneumatron_database.csv")
+data <- open_pneumatron_db("data/raw_pneumatron/leakage_test.csv")
 
 ggplot(data %>% 
-         filter(id %in% c(110, 116, 120, 124),
+         filter(# id %in% c(110, 116, 120, 124),
                 log_line > 2),
        aes(log_line,
          pressure,
