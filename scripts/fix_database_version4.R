@@ -1,22 +1,14 @@
-#library("googledrive")
-#drive_download(
-#  as_id("1MJxkGqGkaaNUOa1yGP0Tt4etdVHzex1M"),
-#  path = "data/IAC/data_iac/pneumatron_database-v4.csv",
-#  overwrite = TRUE
-#)
-
-
-# primeiro troca os nomes dos arquivos
-# depois aperta:
-# Ctrl + Shift + S
-
+# This scripts filter a pneumatron database file, removing lines that do not follow a regular expression patern
+# Steps for database fix:
+# 1 - change file_name and file_trash
+# 2 - press Ctrl + Shift + S
+# 3 - check file_trash if any important data was deleted
 
 #File received  to be cleaned
-file_name <- "data/IAC/data_iac/pneumatron_database-v4.csv"
+file_name <- "data/raw_pneumatron/pneumatron_database.csv"
 
 #File to save removed measures
-file_trash <- "data/IAC/data_iac/trash.csv"
-
+file_trash <- "data/raw_pneumatron/trash.csv"
 
 message("\nStarting to update database with new data from googledrive...\n")
 message("New data from git: ", file_name)
