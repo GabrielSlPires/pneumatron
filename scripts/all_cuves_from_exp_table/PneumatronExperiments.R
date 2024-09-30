@@ -20,6 +20,7 @@ check_experiment_table_classes <- function(df) {
     pneumatron_id = c("numeric", "integer"),
     begin = c("POSIXct", "POSIXt"),
     end = c("POSIXct", "POSIXt"),
+    keep_ip = c("numeric", "integer"),
     min_datetime = c("POSIXct", "POSIXt"),
     max_datetime = c("POSIXct", "POSIXt"),
     min_gas_discharge = c("numeric", "integer"),
@@ -56,7 +57,7 @@ convert_to_pneumatron_experiment <- function(df, start_id) {
   required_cols <- c("pneumatron_file", "water_potential_file", 
                      "pneumatron_id", "begin", "end")
   optional_datetime_cols <- c("min_datetime", "max_datetime")
-  optional_numeric_cols <- c("min_gas_discharge", "max_gas_discharge", "max_wp")
+  optional_numeric_cols <- c("keep_ip", "min_gas_discharge", "max_gas_discharge", "max_wp")
   optional_text_cols <- c("obs")
   
   if (length(setdiff(required_cols, colnames(df))) > 0) {
@@ -107,6 +108,7 @@ convert_to_pneumatron_experiment <- function(df, start_id) {
 #' @param pneumatron_id Device ID.
 #' @param begin Start datetime of the experiment.
 #' @param end End datetime of the experiment.
+#' @param keep_ip (Optional) Initial Pressure to be kept.
 #' @param min_datetime (Optional) Minimum datetime.
 #' @param max_datetime (Optional) Maximum datetime.
 #' @param min_gas_discharge (Optional) Minimum gas discharge.
@@ -120,6 +122,7 @@ create_experiments_table <- function(
     pneumatron_id, 
     begin, 
     end, 
+    keep_ip = NA,
     min_datetime = NA, 
     max_datetime = NA, 
     min_gas_discharge = NA, 
@@ -133,6 +136,7 @@ create_experiments_table <- function(
     pneumatron_id = pneumatron_id,
     begin = begin,
     end = end,
+    keep_ip = keep_ip,
     min_datetime = min_datetime,
     max_datetime = max_datetime,
     min_gas_discharge = min_gas_discharge,
@@ -164,6 +168,7 @@ as_pneumatron_experiment <- function(df) {
 #' @param pneumatron_id Device ID.
 #' @param begin Start datetime of the experiment.
 #' @param end End datetime of the experiment.
+#' @param keep_ip (Optional) Initial Pressure to be kept.
 #' @param min_datetime (Optional) Minimum datetime.
 #' @param max_datetime (Optional) Maximum datetime.
 #' @param min_gas_discharge (Optional) Minimum gas discharge.
@@ -179,6 +184,7 @@ add_new_experiments <- function(
     pneumatron_id,
     begin,
     end,
+    keep_ip = NA,
     min_datetime = NA,
     max_datetime = NA,
     min_gas_discharge = NA,
@@ -192,6 +198,7 @@ add_new_experiments <- function(
     pneumatron_id = pneumatron_id,
     begin = begin,
     end = end,
+    keep_ip = Keep_ip,
     min_datetime = min_datetime,
     max_datetime = max_datetime,
     min_gas_discharge = min_gas_discharge,
@@ -237,6 +244,7 @@ add_experiments_from_df <- function(experiments_table, new_experiments_df) {
 #' @param pneumatron_id (Optional) Device ID.
 #' @param begin (Optional) Start datetime of the experiment.
 #' @param end (Optional) End datetime of the experiment.
+#' @param keep_ip (Optional) Initial Pressure to be kept.
 #' @param min_datetime (Optional) Minimum datetime.
 #' @param max_datetime (Optional) Maximum datetime.
 #' @param min_gas_discharge (Optional) Minimum gas discharge.
@@ -253,6 +261,7 @@ update_experiment <- function(
     pneumatron_id = NA,
     begin = NA,
     end = NA,
+    keep_ip = NA,
     min_datetime = NA,
     max_datetime = NA,
     min_gas_discharge = NA,
@@ -275,6 +284,8 @@ update_experiment <- function(
     experiments_table$begin[idx] <- begin
   if (!is.na(end)) 
     experiments_table$end[idx] <- end
+  if (!is.na(keep_ip)) 
+    experiments_table$keep_ip[idx] <- keep_ip
   if (!is.na(min_datetime)) 
     experiments_table$min_datetime[idx] <- min_datetime
   if (!is.na(max_datetime)) 
