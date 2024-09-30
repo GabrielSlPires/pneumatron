@@ -6,17 +6,17 @@ library(ggside)
 #library(purrr)
 library(lubridate)
 library(ggdaynight)
-# library(pneumatools)
+library(pneumatools)
 
 source("scripts/all_cuves_from_exp_table/utils.R")
 source("scripts/all_cuves_from_exp_table/PneumatronExperiments.R")
 
-
-
-# exp_data <- fread("data/coffea/my_experiments.csv", blank.lines.skip = TRUE)
+# exp_data <- fread("data/experiments.csv", blank.lines.skip = TRUE)
 # 
-# exp_data[, min_gas_discharge := ifelse(is.na(min_gas_discharge), begin, min_gas_discharge)]
-# exp_data[, max_gas_discharge := ifelse(is.na(min_gas_discharge), begin, max_gas_discharge)]
+# exp_data[, begin := ymd_hm(begin)]
+# exp_data[, end := ymd_hm(end)]
+# exp_data[, min_datetime := ifelse(is.na(min_datetime), begin, min_datetime)]
+# exp_data[, max_datetime := ifelse(is.na(max_datetime), end, max_datetime)]
 
 exp_data <- fread("data/experiments.csv", blank.lines.skip = TRUE) # need to add sample ID
 exp_data <- as_pneumatron_experiment(exp_data)
@@ -44,10 +44,15 @@ ggplot(data[id == curve$pneumatron_id],
   geom_vline(xintercept = curve$begin) +
   geom_vline(xintercept = curve$end)
 
+curve$end
+
 # max(data$datetime)
 # exp_data <- update_experiment(exp_data, curve_id,
+#                               max_datetime = ymd_hm("2024-05-06 09:34"),
+#                               max_gas_discharge = 500,
+#                               obs = "Usar keep_ip = 3"
 #                               # max_datetime = curve$max_datetime - 7.5*24*60*60
-#                               min_gas_discharge = 115
+#                               # min_gas_discharge = 115
 #                               )
 # curve <- extract_experiment(exp_data, curve_id)
 # fwrite(exp_data, "data/experiments.csv")
@@ -77,6 +82,7 @@ curve_data <- data[
 
 sort(table(curve_data$initial_pressure_log_line), decreasing = TRUE)
 keep_ip <- as.numeric(names(sort(table(curve_data$initial_pressure_log_line), decreasing = TRUE))[1])
+keep_ip <- 3
 
 curve_data <- data[
   id == curve$pneumatron_id
@@ -88,7 +94,7 @@ curve_data <- data[
 
 ggplot(curve_data, aes(datetime, gd_ul)) +
   geom_daynight() +
-  # geom_hline(yintercept = 870) +
+  # geom_hline(yintercept = 500) +
   geom_point()
 
 water <- open_data_psi(curve$water_potential_file)
@@ -97,15 +103,15 @@ ggplot(water[id == curve$pneumatron_id],
   geom_daynight() +
   geom_point() +
   geom_line() +
-  geom_vline(xintercept = curve$inicio_exp) +
-  geom_vline(xintercept = curve$final_exp)
+  geom_vline(xintercept = curve$begin) +
+  geom_vline(xintercept = curve$end)
 
 filter_water <- water[id == curve$pneumatron_id
                       & between(time, curve$begin, curve$end)
                       & !is.na(pot)]
 filter_water
 
-# curve_data <- extrapolated_wp(curve_data, filter_water[-c(6)])
+curve_data <- extrapolated_wp(curve_data, filter_water[-c(6)])
 curve_data <- extrapolated_wp(curve_data, filter_water)
 
 ggplot(curve_data,
@@ -138,7 +144,7 @@ model_data <- curve_data[
   & datetime < curve$max_datetime
 ]
 
-ggplot(model_data[gd_ul < 180 & psi > -9],
+ggplot(model_data,
        aes(psi, gd_ul)) +
   geom_point()
 
@@ -179,3 +185,29 @@ ggplot(model_data,
   theme_bw()
 curve_id
 model
+log(88/12)/coef(model)["a"] + coef(model)["p50"] #p12
+log(12/88)/coef(model)["a"] + coef(model)["p50"] #p88
+
+ggsave(paste0("data/coffea/curves/", curve_id,".png"))
+
+curve_summary <- data.frame(
+  id = curve_id,
+  a = coef(model)["a"],
+  p50 = coef(model)["p50"],
+  p12 = log(88/12)/coef(model)["a"] + coef(model)["p50"],
+  p88 = log(12/88)/coef(model)["a"] + coef(model)["p50"],
+  p50_dist = filter_water$pot[nrow(filter_water)] - coef(model)["p50"],
+  plot = unique(filter_water$Plot)[1],
+  species = unique(filter_water$Species)[1],
+  ind = unique(filter_water$Ind)[1],
+  good = 0 # 1 = good, 0 = trash, 2 = check latter
+)
+curve_summary
+
+# salvar arquivo de resumos
+fwrite(curve_summary, "data/curve_summary.csv", append = TRUE)
+curve$obs
+exp_data <- update_experiment(exp_data, curve_id,
+                              obs = paste0(curve$obs, "; leakage"))
+
+fwrite(exp_data, "data/experiments.csv")

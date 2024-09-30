@@ -222,3 +222,36 @@ open_data_psi <- function(file_path) {
   df <- dplyr::filter(df, !is.na(id))
   return(df)
 }
+
+# generate stat_functions for vulnerability curve
+geom_vulnerability_curve_pammenter <- function(model, model_confint) {
+  vc_func_pammenter <- function(psi, a = 1, p50 = -5) {
+    100/(1 + exp(a*(psi - p50)))
+  }
+  # get model confidence interval
+  model_confint <- data.frame(t(model_confint))
+  # make it opptional and allow to change values
+  geom_layer <- function(a, p50) {
+    stat_function(fun = vc_func_pammenter,
+                  args = list(a = a, p50 = p50),
+                  alpha = 0.7,
+                  linewidth = 1,
+                  color = "blue",
+                  inherit.aes = FALSE)
+  }
+  layers <- mapply(geom_layer,
+                   model_confint$a,
+                   model_confint$p50,
+                   SIMPLIFY = F)
+  append(
+    layers,
+    list(
+      geom_blank(aes(x = 0)),
+      geom_function(fun = vc_func_pammenter,
+                    linewidth = 1,
+                    alpha = 0.7,
+                    args = as.list(coef(model)),
+                    color = "red")
+    )
+  )
+}
