@@ -1,17 +1,23 @@
-# This scripts filter a pneumatron database file, removing lines that do not follow a regular expression patern
+#  This scripts filter a pneumatron database file, removing lines that do 
+# not follow a regular expression patern.
+
 # Steps for database fix:
-# 1 - change file_name and file_trash
+# 1 - change file_name (in line 10)
 # 2 - press Ctrl + Shift + S
-# 3 - check file_trash if any important data was deleted
+# 3 - check the message outup on R console
+# 4 - check file_trash if any important data was deleted
+# 5 - Done, your database file is fixed!
 
 #File received  to be cleaned
 file_name <- "data/raw_pneumatron/pneumatron_database.csv"
 
+# ------------------------------ NO NEED TO GO DOWN !!!
+
 #File to save removed measures
 file_trash <- "data/raw_pneumatron/trash.csv"
 
-message("\nStarting to update database with new data from googledrive...\n")
-message("New data from git: ", file_name)
+message("\nStarting to fix pneumatron database...\n")
+message("Data from file: ", file_name)
 message("File to store removed data: ", file_trash)
 
 #regex to only allowed formats
